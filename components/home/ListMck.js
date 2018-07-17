@@ -22,7 +22,7 @@ class ListMck extends Component {
             </View>
           </TouchableWithoutFeedback>
         }
-        keyExtractor={item => String(item.id)}
+        keyExtractor={item => item._id}
       />
     )
   }

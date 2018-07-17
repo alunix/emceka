@@ -1,16 +1,18 @@
 import React from 'react'
 import { View, Image, Text, StyleSheet } from 'react-native'
 import StarRating from 'react-native-star-rating'
+import { calculateRating } from '../../utils/Common'
 
 const Mck = (props) => {
   const mck = props.mck
+  const avg = calculateRating(mck.reviews)
   return (
     <View style={styles.cardContainer}>
       <View style={styles.cardView}>
-        <Image source={{ uri: mck.images[0] }} style={styles.cardImage} />
+        <Image source={{ uri: mck.images[0].uri }} style={styles.cardImage} />
         <View style={styles.cardTitle}>
           <Text style={{ flex: 1 }} >{mck.name}</Text>
-          <Text style={{ flex: 1, fontSize: 12 }} >{mck.address}</Text>
+          <Text style={{ flex: 1, fontSize: 12 }} >{mck.description}</Text>
           <View style={{ display: 'flex', flexDirection: 'row' }}>
             <View style={{ flex: 1 }}></View>
             <StarRating
@@ -18,7 +20,7 @@ const Mck = (props) => {
               disabled={true}
               maxStars={5}
               starSize={24}
-              rating={mck.rating}
+              rating={avg}
               emptyStar={'star-border'}
               fullStar={'star'}
               halfStar={'star-half'}
@@ -35,16 +37,16 @@ const Mck = (props) => {
 const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 10,
-    borderColor: '#ececec',
+    borderColor: '#ddd',
     backgroundColor: '#fff',
     borderWidth: 1,
   },
   cardView: {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    flex: 1
   },
   cardImage: {
-    flex: 2,
     width: 100,
     height: 100,
     borderWidth: 1,
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     padding: 10,
-    flex: 4,
+    flex: 1,
     display: 'flex',
     flexDirection: 'column'
   },

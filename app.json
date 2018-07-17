@@ -1,5 +1,39 @@
 {
   "expo": {
-    "sdkVersion": "27.0.0"
+    "sdkVersion": "27.0.0",
+    "name": "EMCEKA",
+    "description": "Find the toilets easily",
+    "icon": "./assets/splash.png",
+    "version": "1.0.0",
+    "slug": "emceka",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "primaryColor": "#7274e5",
+    "ios": {
+      "bundleIdentifier": "id.ekoteguhw.emceka",
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API"
+      }
+    },
+    "android": {
+      "package": "id.ekoteguhw.emceka",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API"
+        }
+      }
+    }
+  },
+  "splash": {
+    "image": "./assets/splash.png",
+    "backgroundColor": "#7f81ff",
+    "resizeMode": "contain"
   }
 }

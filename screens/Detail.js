@@ -16,6 +16,8 @@ import { Rating, Review, Facility, User } from '../components/detail'
 import Swiper from 'react-native-swiper'
 import Modal from 'react-native-modalbox'
 import StarRating from 'react-native-star-rating'
+import Api from '../utils/Api'
+import { calculateRating } from '../utils/Common'
 
 const screen = Dimensions.get('window')
 
@@ -29,7 +31,8 @@ class DetailScreen extends Component {
     super()
     this.state = {
       isOpen: false,
-      swipeToClose: true
+      swipeToClose: true,
+      user: {}
     }
 
     this._showLocation = this._showLocation.bind(this)
@@ -38,12 +41,11 @@ class DetailScreen extends Component {
   }
 
   _showSharing() {
-
     const mck = this.props.navigation.getParam('mck')
 
     Share.share({
       message: mck.description,
-      url: mck.images[0],
+      url: mck.images[0].uri,
       title: mck.name
     }, {
         // Android
@@ -55,6 +57,12 @@ class DetailScreen extends Component {
       })
   }
 
+  _getUser(userId) {
+    return Api.get(`users/get&userId=${userId}`)
+      .then(res => this.setState({ user: res.data }))
+      .catch(err => console.log(err))
+  }
+
   _showRateReview() {
     this.refs.modalRateReview.open()
   }
@@ -64,22 +72,23 @@ class DetailScreen extends Component {
   }
 
   render() {
-
     const mck = this.props.navigation.getParam('mck')
+    this._getUser(mck.userCreated.userId)
+    const averageRating = calculateRating(mck.reviews)
 
     return (
       <ScrollView style={styles.detailContainer}>
         <View style={styles.detailView}>
           <Swiper height={250}>
             {
-              mck.images.map((image, index) => <Image key={index} source={{ uri: image }} style={styles.detailImage} />)
+              mck.images.map((image, index) => <Image key={index} source={{ uri: image.uri }} style={styles.detailImage} />)
             }
           </Swiper>
           <View style={styles.detailLocation}>
             <Text style={styles.detailName}>{mck.name}</Text>
             <Text style={styles.detailAddress}>{mck.address}</Text>
           </View>
-          <User user={mck.user_created} />
+          <User user={this.state.user} />
           <View style={styles.detailFeatureContainer}>
             <View style={styles.featureContainer}>
               <TouchableOpacity
@@ -107,7 +116,7 @@ class DetailScreen extends Component {
             </View>
           </View>
           <Facility facilities={mck.facilities} />
-          <Rating rating={mck.rating} />
+          <Rating rating={averageRating} />
           <Review reviews={mck.reviews} />
 
           <Modal

@@ -2,20 +2,20 @@ import React from 'react'
 import { View, Image, Text, StyleSheet } from 'react-native'
 
 const User = (props) => {
-  const user_created = props.user
+  const userCreated = props.user
   return (
     <View style={styles.userContainer}>
       <Image
-        source={{ uri: user_created.avatar }}
+        source={{ uri: userCreated.avatar }}
         style={styles.avatar} />
       <View style={styles.user}>
         <Text
           style={styles.userName}>
-          {user_created.name}
+          {userCreated.name}
         </Text>
         <Text
           style={styles.userDescription}>
-          {user_created.description}
+          {userCreated.description}
         </Text>
       </View>
     </View>
