@@ -115,7 +115,7 @@ const Navigator = createSwitchNavigator({
   Auth: AuthStack,
   App: Platform.select({ ios: TabIOSStack, android: TabAndroidStack })
 }, {
-    initialRouteName: 'App'
+    initialRouteName: 'Auth'
   })
 
 const App = () => {
