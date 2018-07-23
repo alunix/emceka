@@ -16,6 +16,7 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Swiper from 'react-native-swiper'
 import Expo, { ImagePicker } from 'expo'
 import Api from '../utils/Api'
+import { YOUR_API_FOR_UPLOAD, YOUR_UPLOAD_PRESET } from 'react-native-dotenv'
 
 class AddMckScreen extends Component {
 
@@ -23,8 +24,8 @@ class AddMckScreen extends Component {
     title: 'Add Mck'
   }
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       selectedIndex: {
         hasMirror: 0,
@@ -46,6 +47,7 @@ class AddMckScreen extends Component {
         latitude: 0,
         longitude: 0
       },
+      user: props.navigation.getParam('user')
     }
   }
 
@@ -53,6 +55,7 @@ class AddMckScreen extends Component {
     const newMck = {
       name: this.state.name,
       description: this.state.description,
+      slug: name.split(' ').join('-') + '-' + Date.now(),
       address: this.state.address,
       facilities: {
         room: {
@@ -64,12 +67,12 @@ class AddMckScreen extends Component {
           },
           bath: {
             sum: this.state.room.bath,
-            hasShower: this.state.selectedIndex.hasShower === 1 ? true : false
+            hasShower: this.state.selectedIndex.hasShower == 1 ? true : false
           },
-          hasMirror: this.state.selectedIndex.hasMirror === 1 ? true : false,
-          hasSoap: this.state.selectedIndex.hasSoap === 1 ? true : false,
-          hasTissue: this.state.selectedIndex.hasTissue === 1 ? true : false,
-          hasTrash: this.state.selectedIndex.hasTrash === 1 ? true : false
+          hasMirror: this.state.selectedIndex.hasMirror == 1 ? true : false,
+          hasSoap: this.state.selectedIndex.hasSoap == 1 ? true : false,
+          hasTissue: this.state.selectedIndex.hasTissue == 1 ? true : false,
+          hasTrash: this.state.selectedIndex.hasTrash == 1 ? true : false
         }
       },
       images: this.state.images,
@@ -77,16 +80,18 @@ class AddMckScreen extends Component {
         latitude: this.state.location.latitude,
         longitude: this.state.location.longitude
       },
-      rating: 0,
       reviews: [],
       userCreated: {
-        userId: 'id.ekoteguhw'
+        userId: this.state.user.uid,
+        name: this.state.user.displayName,
+        avatar: this.state.user.photoURL
       }
     }
 
-    Api.post(`mcks/mck/create`, newMck)
+    Api.post(`mcks/create`, newMck)
       .then(res => {
         Alert.alert('Success', 'Your request has been submit.')
+        this.props.navigation.goBack(null)
       })
       .catch(err => {
         Alert.alert('Fail', 'Your request failed.')
@@ -115,10 +120,10 @@ class AddMckScreen extends Component {
 
   async _takePhoto() {
     const { Permissions } = Expo
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+    const { status } = await Permissions.askAsync(Permissions.CAMERA)
 
     if (status === 'granted') {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      let result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [3, 3],
         base64: true
@@ -126,11 +131,11 @@ class AddMckScreen extends Component {
 
       if (!result.cancelled) {
         let base64Img = `data:image/jpg;base64,${result.base64}`
-        let uploadImageApi = 'YOUR_API_FOR_UPLOAD'
+        let uploadImageApi = YOUR_API_FOR_UPLOAD
 
         let data = {
           file: base64Img,
-          upload_preset: 'YOUR_UPLOAD_PRESET'
+          upload_preset: YOUR_UPLOAD_PRESET
         }
 
         Api.post(uploadImageApi, data)
@@ -256,7 +261,7 @@ class AddMckScreen extends Component {
                 tintColor={'#7f81ff'}
                 selectedIndex={this.state.selectedIndex.hasMirror}
                 height={30}
-                style={{ flex: 1, marginBottom: 10 }}
+                style={{ flex: 1, marginVertical: 10 }}
                 onChange={(e) => {
                   const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasMirror: e.nativeEvent.selectedSegmentIndex })
                   this.setState({ selectedIndex })
@@ -270,7 +275,7 @@ class AddMckScreen extends Component {
                 tintColor={'#7f81ff'}
                 selectedIndex={this.state.selectedIndex.hasSoap}
                 height={30}
-                style={{ flex: 1, marginBottom: 10 }}
+                style={{ flex: 1, marginVertical: 10 }}
                 onChange={(e) => {
                   const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasSoap: e.nativeEvent.selectedSegmentIndex })
                   this.setState({ selectedIndex })
@@ -284,7 +289,7 @@ class AddMckScreen extends Component {
                 tintColor={'#7f81ff'}
                 selectedIndex={this.state.selectedIndex.hasTissue}
                 height={30}
-                style={{ flex: 1, marginBottom: 10 }}
+                style={{ flex: 1, marginVertical: 10 }}
                 onChange={(e) => {
                   const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTissue: e.nativeEvent.selectedSegmentIndex })
                   this.setState({ selectedIndex })
@@ -298,7 +303,7 @@ class AddMckScreen extends Component {
                 tintColor={'#7f81ff'}
                 selectedIndex={this.state.selectedIndex.hasTrash}
                 height={30}
-                style={{ flex: 1, marginBottom: 10 }}
+                style={{ flex: 1, marginVertical: 10 }}
                 onChange={(e) => {
                   const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTrash: e.nativeEvent.selectedSegmentIndex })
                   this.setState({ selectedIndex })
@@ -312,7 +317,7 @@ class AddMckScreen extends Component {
                 tintColor={'#7f81ff'}
                 selectedIndex={this.state.selectedIndex.hasShower}
                 height={30}
-                style={{ flex: 1, marginBottom: 10 }}
+                style={{ flex: 1, marginVertical: 10 }}
                 onChange={(e) => {
                   const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasShower: e.nativeEvent.selectedSegmentIndex })
                   this.setState({ selectedIndex })
@@ -321,7 +326,7 @@ class AddMckScreen extends Component {
             </View>
           </View>
         </View>
-        <View>
+        <View style={{ marginBottom: 20 }}>
           <TouchableHighlight
             style={styles.buttonSubmit}
             onPress={() => this._submitMck()}>
@@ -364,17 +369,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   inputText: {
-    padding: 5,
-    borderColor: '#ddd',
+    padding: 10,
+    marginVertical: 10,
     borderWidth: 1,
-    marginBottom: 10,
-    width: '100%'
+    borderColor: '#ddd'
   },
   inputTextFacility: {
-    padding: 5,
-    borderColor: '#ddd',
+    padding: 10,
+    marginVertical: 10,
     borderWidth: 1,
-    marginBottom: 10,
+    borderColor: '#ddd',
     flex: 4
   },
   inputTitleNotBold: {
