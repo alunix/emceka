@@ -1,25 +1,19 @@
 import React, { Component } from 'react'
 import {
-  StyleSheet,
-  Text,
   View,
-  Animated,
-  Image,
-  Dimensions,
   TouchableOpacity,
-  Alert,
-  Platform
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  Dimensions
 } from 'react-native'
-import { MapView } from 'expo'
-import StarRating from 'react-native-star-rating'
-import Api from '../utils/Api'
+import { MaterialCommunityIcons, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import Expo, { MapView } from 'expo'
+import haversine from 'haversine'
 import { calculateRating } from '../utils/Common'
-import { SearchMck } from '../components/home'
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
-
+import Api from '../utils/Api'
 const { width, height } = Dimensions.get('window')
-const CARD_HEIGHT = height / 4
-const CARD_WIDTH = CARD_HEIGHT - 50
 
 class MapScreen extends Component {
 
@@ -45,268 +39,206 @@ class MapScreen extends Component {
     super()
     this.state = {
       markers: [],
+      permissionStatus: false,
       region: {
-        latitude: -5.6598117,
-        longitude: 105.6365743,
-        latitudeDelta: 0.04864195044303443,
-        longitudeDelta: 0.040142817690068,
+        latitude: 0,
+        longitude: 0,
+        latitudeDelta: 0,
+        longitudeDelta: 0
       },
-      initialPosition: 'unknown',
-      lastPosition: 'unknown'
+      query: ''
     }
 
     this._mainMenu = this._mainMenu.bind(this)
+  }
+
+  componentDidMount() {
+    this._getCurrentLocation()
+  }
+
+  async _getMarker() {
+    const response = await Api.get('mcks')
+    this.setState({ markers: response.data })
+  }
+
+  _getData() {
+    let { region } = this.state
+    this._getMarker()
+    if (this.state.permissionStatus) {
+      let markers = this.state.markers
+      markers.filter(marker => {
+        let userLocation = {
+          latitude: region.latitude,
+          longitude: region.longitude
+        }
+
+        let markerLocation = {
+          latitude: marker.location.latitude,
+          longitude: marker.location.longitude
+        }
+        console.log(haversine(userLocation, markerLocation, { unit: 'meter' }))
+        return haversine(userLocation, markerLocation, { unit: 'meter' }) < 5000
+      })
+    }
+    return []
+  }
+
+  async _getCurrentLocation() {
+    const { Location, Permissions } = Expo
+    const { status } = await Permissions.askAsync(Permissions.LOCATION)
+
+    if (status === 'granted') {
+      Location.getCurrentPositionAsync({ enableHighAccuracy: true })
+        .then(res => {
+          this.setState({
+            region: {
+              latitude: res.coords.latitude,
+              longitude: res.coords.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421
+            },
+            permissionStatus: true
+          })
+          this._getData()
+        })
+        .catch(err => console.log(err))
+    } else {
+      throw new Error('Location permission not granted')
+    }
   }
 
   _mainMenu() {
     Alert.alert('Info', 'Emceka version 1.0.0')
   }
 
-  componentWillMount() {
-    this.index = 0
-    this.animation = new Animated.Value(0)
-  }
-
-  componentDidMount() {
-    this.props.navigation.setParams({ mainMenu: this._mainMenu })
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const initialPosition = position
-        console.log(initialPosition)
-        this.setState({ initialPosition })
-      },
-      (error) => alert(error.message),
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 1000
-      }
-    )
-
-    this.watchID = navigator.geolocation.watchPosition((position) => {
-      const lastPosition = position
-      console.log(lastPosition)
-      this.setState({ lastPosition })
-    })
-
-    Api.get(`http://localhost:4000/mcks`).then(response => {
-      const mcks = response.data
-      const markers = mcks.map(mck => {
-        return {
-          coordinate: mck.location,
-          title: mck.name,
-          description: mck.description,
-          image: { uri: mck.images[0].uri },
-          rating: calculateRating(mck.reviews)
-        }
-      })
-
-      this.setState({ markers: markers })
-    }).catch(err => console.log(err))
-
-    // We should detect when scrolling has stopped then animate
-    // We should just debounce the event listener here
-    this.animation.addListener(({ value }) => {
-      let index = Math.floor(value / CARD_WIDTH + 0.3) // animate 30% away from landing on the next item
-      if (index >= this.state.markers.length) {
-        index = this.state.markers.length - 1
-      }
-      if (index <= 0) {
-        index = 0
-      }
-
-      clearTimeout(this.regionTimeout)
-      this.regionTimeout = setTimeout(() => {
-        if (this.index !== index) {
-          this.index = index
-          const { coordinate } = this.state.markers[index]
-          this.map.animateToRegion(
-            {
-              ...coordinate,
-              latitudeDelta: this.state.region.latitudeDelta,
-              longitudeDelta: this.state.region.longitudeDelta,
+  async _showNearest() {
+    if (this.state.permissionStatus) {
+      Expo.Location.geocodeAsync(this.state.query)
+        .then(res => {
+          this.setState({
+            region: {
+              latitude: res[0].latitude,
+              longitude: res[0].longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421
             },
-            350
-          )
-        }
-      }, 10)
-    })
-  }
+            permissionStatus: true
+          })
+          this._getData()
+        })
+        .catch(err => console.log(err))
 
-  componentWillUnmount() {
-    navigator.geolocation.clearWatch(this.watchID)
+      this.setState({ query: '' })
+    }
   }
 
   render() {
-    const interpolations = this.state.markers.map((marker, index) => {
-      const inputRange = [
-        (index - 1) * CARD_WIDTH,
-        index * CARD_WIDTH,
-        ((index + 1) * CARD_WIDTH),
-      ]
-      const scale = this.animation.interpolate({
-        inputRange,
-        outputRange: [1, 2.5, 1],
-        extrapolate: 'clamp',
-      })
-      const opacity = this.animation.interpolate({
-        inputRange,
-        outputRange: [0.35, 1, 0.35],
-        extrapolate: 'clamp',
-      })
-      return { scale, opacity }
-    })
-
-    /*
-    let lastRegion = this.state.region
-    let newRegion = {
-      latitude: this.state.lastPosition.coords.latitude,
-      longitude: this.state.lastPosition.coords.longitude,
-      latitudeDelta: lastRegion.latitudeDelta,
-      longitudeDelta: lastRegion.longitudeDelta
-    }
-    */
+    const markers = this.state.markers
 
     return (
-      <View style={styles.container}>
-        <SearchMck />
+      <View style={styles.mapContainer}>
+        <StatusBar barStyle="light-content" hidden={false} />
+        <View style={styles.searchContainer}>
+          <View style={styles.searchView}>
+            <TextInput
+              placeholder="Type your search"
+              underlineColorAndroid={'rgba(0,0,0,0)'}
+              style={styles.searchTextInput}
+              autoCapitalize="none"
+              value={this.state.query}
+              onChangeText={(text) => this.setState({ query: text })}
+            />
+            <TouchableOpacity
+              style={styles.searchButton}
+              onPress={() => this._showNearest()}>
+              <MaterialIcons name="search" size={28} color="#7f81ff" />
+            </TouchableOpacity>
+          </View>
+        </View>
         <MapView
-          ref={map => this.map = map}
-          initialRegion={this.state.region}
-          style={styles.container}>
-          {this.state.markers.map((marker, index) => {
-            const scaleStyle = {
-              transform: [
-                {
-                  scale: interpolations[index].scale,
-                },
-              ],
-            }
-            const opacityStyle = {
-              opacity: interpolations[index].opacity,
-            }
-            return (
-              <MapView.Marker key={index} coordinate={marker.coordinate}>
-                <Animated.View style={[styles.markerWrap, opacityStyle]}>
-                  <Animated.View style={[styles.ring, scaleStyle]} />
-                  <View style={styles.marker} />
-                </Animated.View>
-              </MapView.Marker>
-            );
-          })}
+          style={styles.map}
+          mapType="standard"
+          showsUserLocation={true}
+          followUserLocation={true}
+          showsCompass={false}
+          showsPointOfInterest={false}
+          zoomEnabled={true}
+          scrollEnabled={true}
+          region={this.state.region}>
+          <MapView.Marker
+            coordinate={{
+              latitude: this.state.region.latitude,
+              longitude: this.state.region.longitude,
+            }}
+            title={'Me'}
+            description={'My location'}
+            image={require('../assets/me.png')}
+          />
+          {
+            markers.length > 0 && markers.map((marker, i) => {
+
+              if (marker.reviews.length > 0) {
+                return (
+                  <MapView.Marker
+                    key={i}
+                    coordinate={{
+                      latitude: marker.location.latitude,
+                      longitude: marker.location.longitude,
+                    }}
+                    title={marker.name}
+                    description={marker.description}
+                    image={
+                      calculateRating(marker.reviews) > 4 ? require('../assets/emo5.png') : (calculateRating(marker.reviews) > 3 && calculateRating(reviews) <= 4) ? require('../assets/emo4.png') : (calculateRating(reviews) > 2 && calculateRating(reviews) <= 3) ? require('../assets/emo3.png') : (calculateRating(reviews) > 1 && calculateRating(reviews) <= 2) ? require('../assets/emo2.png') : require('../assets/emo1.png')
+                    }
+                  />
+                )
+              } else {
+                return (
+                  <MapView.Marker
+                    key={i}
+                    coordinate={{
+                      latitude: marker.location.latitude,
+                      longitude: marker.location.longitude,
+                    }}
+                    title={marker.name}
+                    description={marker.description}
+                  />
+                )
+              }
+            })
+          }
         </MapView>
-        <Animated.ScrollView
-          horizontal
-          scrollEventThrottle={1}
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={CARD_WIDTH}
-          onScroll={Animated.event(
-            [
-              {
-                nativeEvent: {
-                  contentOffset: {
-                    x: this.animation,
-                  },
-                },
-              },
-            ],
-            { useNativeDriver: true }
-          )}
-          style={styles.scrollView}
-          contentContainerStyle={styles.endPadding}>
-          {this.state.markers.map((marker, index) => (
-            <View style={styles.card} key={index}>
-              <Image
-                source={marker.image}
-                style={styles.cardImage}
-                resizeMode="cover"
-              />
-              <View style={styles.textContent}>
-                <Text numberOfLines={3} style={styles.cardtitle}>{marker.title}</Text>
-                <StarRating
-                  style={{ flex: 1 }}
-                  disabled={true}
-                  maxStars={5}
-                  starSize={12}
-                  rating={marker.rating}
-                  emptyStar={'star-border'}
-                  fullStar={'star'}
-                  halfStar={'star-half'}
-                  iconSet={'MaterialIcons'}
-                  fullStarColor={'#7f81ff'}
-                />
-              </View>
-            </View>
-          ))}
-        </Animated.ScrollView>
       </View>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  mapContainer: {
+    flex: 1
   },
-  scrollView: {
-    position: 'absolute',
-    bottom: 30,
-    left: 0,
-    right: 0,
-    paddingVertical: 10,
+  map: {
+    width: width,
+    height: height
   },
-  endPadding: {
-    paddingRight: width - CARD_WIDTH,
+  searchContainer: {
+    backgroundColor: '#fff'
   },
-  card: {
+  searchView: {
     padding: 10,
-    elevation: 2,
-    backgroundColor: "#fff",
-    marginHorizontal: 10,
-    shadowColor: "#000",
-    shadowRadius: 5,
-    shadowOpacity: 0.3,
-    shadowOffset: { x: 2, y: -2 },
-    height: CARD_HEIGHT,
-    width: CARD_WIDTH + 10,
-    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'row'
   },
-  cardImage: {
-    flex: 4,
-    width: '100%',
-    height: '100%',
-    alignSelf: 'center',
-  },
-  textContent: {
-    flex: 1,
-  },
-  cardtitle: {
-    fontSize: 12,
-    marginTop: 5,
-    fontWeight: 'bold',
-    color: '#7f81ff'
-  },
-  cardRating: {
-    alignItems: 'center',
-  },
-  markerWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  marker: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(130,4,150, 0.9)',
-  },
-  ring: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(130,4,150, 0.3)',
-    position: 'absolute',
+  searchTextInput: {
+    flex: 10,
     borderWidth: 1,
-    borderColor: 'rgba(130,4,150, 0.5)',
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 5
+  },
+  searchButton: {
+    flex: 1,
+    marginLeft: 10
   }
 })
 
