@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Platform, Alert } from 'react-native'
+import { View, TouchableOpacity, Platform, Alert, Text } from 'react-native'
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
 
 class AboutScreen extends Component {
@@ -38,7 +38,14 @@ class AboutScreen extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
+      <View style={{ flex: 1, padding: 10 }}>
+        <View style={{backgroundColor: '#fff', flex: 1, flexDirection: 'column'}}>
+        <Text style={{ padding: 10, color: '#fff', backgroundColor: '#ff7fc6', fontWeight: 'bold', textAlign: 'center' }}>EMCEKA App</Text>
+        <Text style={{marginVertical: 10, padding: 10}}>
+          Find the nearest loos/toilets, know the detail, give rating, add new place.
+        </Text>
+        </View>
+      </View>
     )
   }
 }
