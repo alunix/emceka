@@ -2,15 +2,8 @@ import React, { Component } from 'react'
 import { View, Text, FlatList, StyleSheet } from 'react-native'
 import StarRating from 'react-native-star-rating'
 import Separator from './Separator'
-import Api from '../../utils/Api'
 
 class Review extends Component {
-
-  _getUser(userId) {
-    return Api.get(`users/get&userId=${userId}`)
-      .then(res => console.log(res.data))
-      .catch(err => console.log(err))
-  }
 
   render() {
     const reviews = this.props.reviews
@@ -33,7 +26,7 @@ class Review extends Component {
                     <Text
                       style={styles.itemUser}>
                       {
-                        item.userReview.userId
+                        item.userReview.name
                       }
                     </Text>
                     <StarRating
