@@ -4,6 +4,7 @@ import { MaterialIcons, FontAwesome, Octicons } from '@expo/vector-icons'
 import Expo, { ImagePicker } from 'expo'
 import Api from '../utils/Api'
 import * as firebase from 'firebase'
+import { YOUR_API_FOR_UPLOAD, YOUR_UPLOAD_PRESET } from 'react-native-dotenv'
 
 class RegisterScreen extends Component {
 
@@ -56,11 +57,11 @@ class RegisterScreen extends Component {
 
       if (!result.cancelled) {
         let base64Img = `data:image/jpg;base64,${result.base64}`
-        let uploadImageApi = 'YOUR_API_FOR_UPLOAD'
+        let uploadImageApi = YOUR_API_FOR_UPLOAD
 
         let data = {
           file: base64Img,
-          upload_preset: 'YOUR_UPLOAD_PRESET'
+          upload_preset: YOUR_UPLOAD_PRESET
         }
 
         Api.post(uploadImageApi, data)

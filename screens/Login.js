@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import { View, TouchableHighlight, Text, StyleSheet, TextInput, TouchableOpacity, StatusBar, Alert } from 'react-native'
 import { MaterialIcons, FontAwesome, Octicons } from '@expo/vector-icons'
 import * as firebase from 'firebase'
+import { YOUR_FIREBASE_API_KEY, YOUR_FIREBASE_AUTH_DOMAIN, YOUR_FIREBASE_DATABSE_URL } from 'react-native-dotenv'
 
 let config = {
-  apiKey: 'YOUR_FIREBASE_API_KEY',
-  authDomain: 'YOUR_FIREBASE_AUTH_DOMAIN',
-  databaseURL: 'YOUR_FIREBASE_DATABASE_URL'
+  apiKey: YOUR_FIREBASE_API_KEY,
+  authDomain: YOUR_FIREBASE_AUTH_DOMAIN,
+  databaseURL: YOUR_FIREBASE_DATABSE_URL
 }
 
 firebase.initializeApp(config)
