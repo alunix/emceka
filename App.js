@@ -43,6 +43,17 @@ const AppStack = createStackNavigator({
     initialRouteName: 'Home', navigationOptions: navigationOptions
   })
 
+AppStack.navigationOptions = ({ navigation }) => {
+  if (navigation.state.index == 1) {
+    return {
+      tabBarVisible: false
+    }
+  }
+  return {
+    tabBarVisible: true
+  }
+}
+
 const MapStack = createStackNavigator({
   Map: MapScreen
 }, {
