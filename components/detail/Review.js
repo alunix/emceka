@@ -6,7 +6,7 @@ import Separator from './Separator'
 class Review extends Component {
 
   render() {
-    const reviews = this.props.reviews
+    const { reviews } = this.props
     return (
       <View style={styles.reviewContainer}>
         <Text
@@ -15,13 +15,13 @@ class Review extends Component {
       </Text>
         <Separator color="#787878" />
         {
-          reviews && <FlatList
+          reviews !== null ? <FlatList
             data={reviews}
+            keyExtractor={(item, index) => String(index)}
             renderItem={({ item }) => {
               return (
                 <View
-                  style={styles.reviewItem}
-                  key={item.id}>
+                  style={styles.reviewItem}>
                   <View style={styles.itemView}>
                     <Text
                       style={styles.itemUser}>
@@ -49,8 +49,7 @@ class Review extends Component {
                 </View>
               )
             }}
-            keyExtractor={item => item._id}
-          />
+          /> : ''
         }
       </View>
     )

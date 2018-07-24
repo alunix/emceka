@@ -1,11 +1,15 @@
 import React, { Component } from 'react'
 import { FlatList, TouchableWithoutFeedback, View } from 'react-native'
 import Mck from './Mck'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { getMck } from '../../store/actions'
 
 class ListMck extends Component {
 
   _getMck(mck) {
-    this.props.nav.navigate('Detail', { mck: mck })
+    this.props.nav.navigate('Detail')
+    this.props.getMck(mck)
   }
 
   render() {
@@ -28,4 +32,6 @@ class ListMck extends Component {
   }
 }
 
-export default ListMck
+const mapDispatchToProps = (dispatch) => bindActionCreators({ getMck }, dispatch)
+
+export default connect(null, mapDispatchToProps)(ListMck)

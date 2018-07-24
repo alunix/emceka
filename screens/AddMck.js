@@ -17,6 +17,9 @@ import Swiper from 'react-native-swiper'
 import Expo, { ImagePicker } from 'expo'
 import Api from '../utils/Api'
 import { YOUR_API_FOR_UPLOAD, YOUR_UPLOAD_PRESET } from 'react-native-dotenv'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { setMcks } from '../store/actions'
 
 class AddMckScreen extends Component {
 
@@ -46,16 +49,16 @@ class AddMckScreen extends Component {
       location: {
         latitude: 0,
         longitude: 0
-      },
-      user: props.navigation.getParam('user')
+      }
     }
   }
 
   _submitMck() {
+    const user = this.props.data.user
     const newMck = {
       name: this.state.name,
       description: this.state.description,
-      slug: name.split(' ').join('-') + '-' + Date.now(),
+      slug: this.state.name.split(' ').join('-') + '-' + Date.now(),
       address: this.state.address,
       facilities: {
         room: {
@@ -82,14 +85,17 @@ class AddMckScreen extends Component {
       },
       reviews: [],
       userCreated: {
-        userId: this.state.user.uid,
-        name: this.state.user.displayName,
-        avatar: this.state.user.photoURL
+        userId: user.uid,
+        name: user.displayName,
+        avatar: user.photoURL
       }
     }
 
     Api.post(`mcks/create`, newMck)
       .then(res => {
+        let mcks = this.props.data.mcks
+        mcks.push(newMck)
+        this.props.setMcks(mcks)
         Alert.alert('Success', 'Your request has been submit.')
         this.props.navigation.goBack(null)
       })
@@ -120,10 +126,10 @@ class AddMckScreen extends Component {
 
   async _takePhoto() {
     const { Permissions } = Expo
-    const { status } = await Permissions.askAsync(Permissions.CAMERA)
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
 
     if (status === 'granted') {
-      let result = await ImagePicker.launchCameraAsync({
+      let result = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
         aspect: [3, 3],
         base64: true
@@ -409,4 +415,12 @@ const styles = StyleSheet.create({
   }
 })
 
-export default AddMckScreen
+const mapStateToProps = (state) => {
+  return {
+    data: state
+  }
+}
+
+const mapDispatchToProps = (dispatch) => bindActionCreators({ setMcks }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddMckScreen)

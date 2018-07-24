@@ -29,6 +29,8 @@
     "react-native-modalbox": "^1.6.0",
     "react-native-star-rating": "^1.0.9",
     "react-native-swiper": "^1.5.13",
-    "react-navigation": "^2.6.2"
+    "react-navigation": "^2.6.2",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0"
   }
 }

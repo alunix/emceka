@@ -20,7 +20,9 @@ import StarRating from 'react-native-star-rating'
 import Api from '../utils/Api'
 import { calculateRating } from '../utils/Common'
 import Expo, { MapView } from 'expo'
-import * as firebase from 'firebase'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { getMck } from '../store/actions'
 
 const screen = Dimensions.get('window')
 
@@ -62,7 +64,7 @@ class DetailScreen extends Component {
   }
 
   _showSharing() {
-    const mck = this.props.navigation.getParam('mck')
+    const mck = this.props.data.mck
 
     Share.share({
       message: mck.description,
@@ -99,33 +101,37 @@ class DetailScreen extends Component {
     if (!title || !content || !star) {
       Alert.alert('Fail', 'Please fill title, review, and give rating!')
     } else {
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          let dataReview = {
-            title: this.state.review.title,
-            rating: this.state.review.star,
-            review: this.state.review.content,
-            userReview: {
-              userId: user.uid,
-              name: user.displayName
-            }
-          }
-
-          Api.post(`mcks/review&mck_id=${mck_id}`, dataReview)
-            .then(res => {
-              Alert.alert('Success', 'Review has been submit')
-              this.refs.modalLocation.close()
-            }).catch(err => {
-              console.log(err)
-              Alert.alert('Fail', 'Review failed to being submitted')
-            })
+      const user = this.props.data.user
+      let dataReview = {
+        title: this.state.review.title,
+        rating: this.state.review.star,
+        review: this.state.review.content,
+        userReview: {
+          userId: user.uid,
+          name: user.displayName
         }
-      })
+      }
+
+      Api.post(`mcks/review&mck_id=${mck_id}`, dataReview)
+        .then(res => {
+          let mck = this.props.data.mck
+          mck.reviews.push(dataReview)
+          this.props.getMck(mck)
+          Alert.alert('Success', 'Review has been submit')
+        }).catch(err => {
+          console.log(err)
+          Alert.alert('Fail', 'Review failed to being submitted')
+        })
+
+      const review = Object.assign({}, this.state.review,
+        { title: '', star: 0, content: '' })
+      this.setState({ review })
+      setTimeout(() => this.refs.modalLocation.close(), 500)
     }
   }
 
   render() {
-    const mck = this.props.navigation.getParam('mck')
+    const mck = this.props.data.mck
     let user = {
       name: mck.userCreated.name,
       description: mck.userCreated.description,
@@ -405,4 +411,12 @@ const styles = StyleSheet.create({
   },
 })
 
-export default DetailScreen
+const mapStateToProps = (state) => {
+  return {
+    data: state
+  }
+}
+
+const mapDispatchToProps = (dispatch) => bindActionCreators({ getMck }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(DetailScreen)

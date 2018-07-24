@@ -18,6 +18,9 @@ import {
 
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
+import { Provider } from 'react-redux'
+import store from './store'
+
 const navigationOptions = {
   headerStyle: {
     backgroundColor: '#7f81ff',
@@ -130,7 +133,11 @@ const Navigator = createSwitchNavigator({
   })
 
 const App = () => {
-  return (<Navigator />)
+  return (
+    <Provider store={store}>
+      <Navigator />
+    </Provider>
+  )
 }
 
 export default App
