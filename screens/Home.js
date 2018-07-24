@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, StatusBar, Alert, TextInput } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
-import { ListMck, SearchMck } from '../components/home'
+import { ListMck } from '../components/home'
 import Api from '../utils/Api'
 import * as firebase from 'firebase'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { setMcks, setUserLoggedIn, searchMcks, setMarkers } from '../store/actions'
 
 class HomeScreen extends Component {
 
@@ -30,12 +33,11 @@ class HomeScreen extends Component {
   constructor() {
     super()
     this.state = {
-      mcks: [],
-      user: {}
+      query: ''
     }
-
     this._addMck = this._addMck.bind(this)
     this._signOut = this._signOut.bind(this)
+    this._searchMcks = this._searchMcks.bind(this)
   }
 
   componentDidMount() {
@@ -45,49 +47,56 @@ class HomeScreen extends Component {
 
   async _getData() {
     const response = await Api.get('mcks')
-    console.log(response.data)
-    this.setState({ mcks: response.data })
+    this.props.setMcks(response.data)
 
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        /*
-        const dataUser = this.props.navigation.getParam('dataUser')
-        const newUserKey = firebase.database().ref().child('users').push().key
-        firebase.database().ref('users/').update({
-          [newUserKey]: dataUser
-        })
-
-        firebase.database().ref('users/' + newUserKey).on('value', snapshot => {
-          const user = Object.create(snapshot.val())
-          this.setState({ user: user })
-        })
-        */
-        this.setState({ user: user })
+        this.props.setUserLoggedIn(user)
       }
     })
   }
 
   _addMck() {
-    this.props.navigation.navigate('AddMck', { userId: this.state.user.uid })
+    this.props.navigation.navigate('AddMck')
   }
 
   _signOut() {
     firebase.auth().signOut()
       .then(() => {
+        this.props.setUserLoggedIn({})
+        this.props.setMcks([])
+        this.props.setMarkers([])
         this.props.navigation.navigate('Login')
         Alert.alert('Success', 'Thank you for using the app')
       })
       .catch(err => console.log(err))
   }
 
+  _searchMcks(query) {
+    this.setState({ query: query })
+    this.props.searchMcks(query)
+  }
+
   render() {
-    console.log(this.state.user)
     return (
       <View style={styles.homeContainer}>
         <StatusBar barStyle="light-content" hidden={false} />
-        <SearchMck />
+        <View style={styles.searchContainer}>
+          <View style={styles.searchView}>
+            <TextInput
+              placeholder="Type your search"
+              underlineColorAndroid={'rgba(0,0,0,0)'}
+              style={styles.searchTextInput}
+              autoCapitalize="none"
+              value={this.state.query}
+              onChangeText={(text) => this._searchMcks(text)}
+            />
+          </View>
+        </View>
         <View style={styles.listContainer}>
-          <ListMck mcks={this.state.mcks} nav={this.props.navigation} />
+          {
+            this.state.query != '' ? <ListMck mcks={this.props.data.searched} nav={this.props.navigation} /> : <ListMck mcks={this.props.data.mcks} nav={this.props.navigation} />
+          }
         </View>
       </View>
     )
@@ -100,7 +109,31 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 10
+  },
+  searchContainer: {
+    backgroundColor: '#fff',
+    marginBottom: 5
+  },
+  searchView: {
+    padding: 10,
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  searchTextInput: {
+    flex: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 5
   }
 })
 
-export default HomeScreen
+const mapStateToProps = (state) => {
+  return {
+    data: state
+  }
+}
+
+const mapDispatchToProps = (dispatch) => bindActionCreators({ setMcks, setUserLoggedIn, searchMcks, setMarkers }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen)

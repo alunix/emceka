@@ -12,8 +12,10 @@ import { MaterialCommunityIcons, Ionicons, MaterialIcons } from '@expo/vector-ic
 import Expo, { MapView } from 'expo'
 import haversine from 'haversine'
 import { calculateRating } from '../utils/Common'
-import Api from '../utils/Api'
 const { width, height } = Dimensions.get('window')
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { setMarkers } from '../store/actions'
 
 class MapScreen extends Component {
 
@@ -38,7 +40,6 @@ class MapScreen extends Component {
   constructor() {
     super()
     this.state = {
-      markers: [],
       permissionStatus: false,
       region: {
         latitude: 0,
@@ -56,17 +57,11 @@ class MapScreen extends Component {
     this._getCurrentLocation()
   }
 
-  async _getMarker() {
-    const response = await Api.get('mcks')
-    this.setState({ markers: response.data })
-  }
-
   _getData() {
     let { region } = this.state
-    this._getMarker()
     if (this.state.permissionStatus) {
-      let markers = this.state.markers
-      markers.filter(marker => {
+      let markers = this.props.data.mcks
+      const newMarkers = markers.filter(marker => {
         let userLocation = {
           latitude: region.latitude,
           longitude: region.longitude
@@ -76,11 +71,12 @@ class MapScreen extends Component {
           latitude: marker.location.latitude,
           longitude: marker.location.longitude
         }
-        console.log(haversine(userLocation, markerLocation, { unit: 'meter' }))
+
         return haversine(userLocation, markerLocation, { unit: 'meter' }) < 5000
       })
+      this.props.setMarkers(newMarkers)
     }
-    return []
+    this.props.setMarkers([])
   }
 
   async _getCurrentLocation() {
@@ -133,8 +129,7 @@ class MapScreen extends Component {
   }
 
   render() {
-    const markers = this.state.markers
-
+    const { markers } = this.props.data
     return (
       <View style={styles.mapContainer}>
         <StatusBar barStyle="light-content" hidden={false} />
@@ -175,20 +170,18 @@ class MapScreen extends Component {
             image={require('../assets/me.png')}
           />
           {
-            markers.length > 0 && markers.map((marker, i) => {
-
-              if (marker.reviews.length > 0) {
+            markers && markers.map((marker, i) => {
+              const { reviews, name, description, location } = marker
+              if (reviews.length > 0) {
+                const rating = calculateRating(reviews)
                 return (
                   <MapView.Marker
                     key={i}
-                    coordinate={{
-                      latitude: marker.location.latitude,
-                      longitude: marker.location.longitude,
-                    }}
-                    title={marker.name}
-                    description={marker.description}
+                    coordinate={location}
+                    title={name}
+                    description={description}
                     image={
-                      calculateRating(marker.reviews) > 4 ? require('../assets/emo5.png') : (calculateRating(marker.reviews) > 3 && calculateRating(reviews) <= 4) ? require('../assets/emo4.png') : (calculateRating(reviews) > 2 && calculateRating(reviews) <= 3) ? require('../assets/emo3.png') : (calculateRating(reviews) > 1 && calculateRating(reviews) <= 2) ? require('../assets/emo2.png') : require('../assets/emo1.png')
+                      rating > 4 ? require('../assets/emo5.png') : (rating > 3 && rating <= 4) ? require('../assets/emo4.png') : (rating > 2 && rating <= 3) ? require('../assets/emo3.png') : (rating > 1 && rating <= 2) ? require('../assets/emo2.png') : require('../assets/emo1.png')
                     }
                   />
                 )
@@ -196,12 +189,9 @@ class MapScreen extends Component {
                 return (
                   <MapView.Marker
                     key={i}
-                    coordinate={{
-                      latitude: marker.location.latitude,
-                      longitude: marker.location.longitude,
-                    }}
-                    title={marker.name}
-                    description={marker.description}
+                    coordinate={location}
+                    title={name}
+                    description={description}
                   />
                 )
               }
@@ -242,4 +232,12 @@ const styles = StyleSheet.create({
   }
 })
 
-export default MapScreen
+const mapStateToProps = (state) => {
+  return {
+    data: state
+  }
+}
+
+const mapDispatchToProps = (dispatch) => bindActionCreators({ setMarkers }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(MapScreen)
