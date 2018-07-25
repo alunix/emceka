@@ -126,10 +126,10 @@ class AddMckScreen extends Component {
 
   async _takePhoto() {
     const { Permissions } = Expo
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+    const { status } = await Permissions.askAsync(Permissions.CAMERA)
 
     if (status === 'granted') {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      let result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [3, 3],
         base64: true
