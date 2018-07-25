@@ -2,7 +2,6 @@ import {
   SET_MCKS,
   GET_MCK,
   SET_USER_LOGGED_IN,
-  SET_MARKERS,
   SEARCH_MCKS
 } from './actionType'
 
@@ -30,11 +29,6 @@ const reducers = (state = initialState, action) => {
       return {
         ...state,
         user: action.payload
-      }
-    case SET_MARKERS:
-      return {
-        ...state,
-        markers: action.payload
       }
     case SEARCH_MCKS:
       return {

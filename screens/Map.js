@@ -6,16 +6,18 @@ import {
   StatusBar,
   StyleSheet,
   TextInput,
-  Dimensions
+  Dimensions,
+  Text
 } from 'react-native'
-import { MaterialCommunityIcons, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { MaterialCommunityIcons, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
 import Expo, { MapView } from 'expo'
 import haversine from 'haversine'
 import { calculateRating } from '../utils/Common'
 const { width, height } = Dimensions.get('window')
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { setMarkers } from '../store/actions'
+import { getMck } from '../store/actions'
+import getDirections from 'react-native-google-maps-directions'
 
 class MapScreen extends Component {
 
@@ -33,6 +35,18 @@ class MapScreen extends Component {
             })
           }
         </TouchableOpacity>
+      ),
+      headerRight: (
+        <TouchableOpacity
+          style={{ paddingRight: 10 }}
+          onPress={navigation.getParam('locateMe')}>
+          {
+            Platform.select({
+              ios: <Ionicons name="ios-refresh" size={24} color="white" />,
+              android: <FontAwesome name="refresh" size={24} color="white" />
+            })
+          }
+        </TouchableOpacity>
       )
     }
   }
@@ -47,14 +61,17 @@ class MapScreen extends Component {
         latitudeDelta: 0,
         longitudeDelta: 0
       },
-      query: ''
+      query: '',
+      markers: []
     }
 
     this._mainMenu = this._mainMenu.bind(this)
+    this._locateMe = this._locateMe.bind(this)
   }
 
   componentDidMount() {
     this._getCurrentLocation()
+    this.props.navigation.setParams({ locateMe: this._locateMe })
   }
 
   _getData() {
@@ -74,9 +91,8 @@ class MapScreen extends Component {
 
         return haversine(userLocation, markerLocation, { unit: 'meter' }) < 5000
       })
-      this.props.setMarkers(newMarkers)
+      this.setState({ markers: newMarkers })
     }
-    this.props.setMarkers([])
   }
 
   async _getCurrentLocation() {
@@ -107,6 +123,10 @@ class MapScreen extends Component {
     Alert.alert('Info', 'Emceka version 1.0.0')
   }
 
+  _locateMe() {
+    this._getCurrentLocation()
+  }
+
   async _showNearest() {
     if (this.state.permissionStatus) {
       Expo.Location.geocodeAsync(this.state.query)
@@ -128,8 +148,37 @@ class MapScreen extends Component {
     }
   }
 
+  _getDirection(location = {}) {
+    if (this.state.permissionStatus) {
+      const data = {
+        source: {
+          latitude: this.state.region.latitude,
+          longitude: this.state.region.longitude
+        },
+        destination: location,
+        params: [
+          {
+            key: "travelmode",
+            value: "driving" // may be "walking", "bicycling" or "transit" as well
+          },
+          {
+            key: "dir_action",
+            value: "navigate" // this instantly initializes navigation using the given travel mode
+          }
+        ]
+      }
+
+      getDirections(data)
+    }
+  }
+
+  _getDetail(marker) {
+    this.props.navigation.navigate('Detail')
+    this.props.getMck(marker)
+  }
+
   render() {
-    const { markers } = this.props.data
+    const { markers } = this.state
     return (
       <View style={styles.mapContainer}>
         <StatusBar barStyle="light-content" hidden={false} />
@@ -170,7 +219,7 @@ class MapScreen extends Component {
             image={require('../assets/me.png')}
           />
           {
-            markers && markers.map((marker, i) => {
+            markers.length > 0 ? markers.map((marker, i) => {
               const { reviews, name, description, location } = marker
               if (reviews.length > 0) {
                 const rating = calculateRating(reviews)
@@ -182,8 +231,34 @@ class MapScreen extends Component {
                     description={description}
                     image={
                       rating > 4 ? require('../assets/emo5.png') : (rating > 3 && rating <= 4) ? require('../assets/emo4.png') : (rating > 2 && rating <= 3) ? require('../assets/emo3.png') : (rating > 1 && rating <= 2) ? require('../assets/emo2.png') : require('../assets/emo1.png')
-                    }
-                  />
+                    }>
+                    <MapView.Callout>
+                      <View style={styles.callout}>
+                        <Text style={{ fontWeight: 'bold' }}>{name}</Text>
+                        <Text>{description}</Text>
+                        <View style={{
+                          width: '100%',
+                          flexDirection: 'row',
+                          justifyContent: 'center'
+                        }}>
+                          <TouchableOpacity
+                            style={styles.callDirection}
+                            onPress={() => this._getDetail(marker)}>
+                            <View style={styles.callButton}>
+                              <MaterialIcons name="pageview" size={28} color="#ff7fc6" />
+                            </View>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.callDirection}
+                            onPress={() => this._getDirection(location)}>
+                            <View style={styles.submitButton}>
+                              <MaterialIcons name="directions" size={28} color="#515151" />
+                            </View>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </MapView.Callout>
+                  </MapView.Marker>
                 )
               } else {
                 return (
@@ -191,11 +266,24 @@ class MapScreen extends Component {
                     key={i}
                     coordinate={location}
                     title={name}
-                    description={description}
-                  />
+                    description={description}>
+                    <MapView.Callout>
+                      <View style={styles.callout}>
+                        <Text style={{ fontWeight: 'bold' }}>{name}</Text>
+                        <Text>{description}</Text>
+                        <TouchableOpacity
+                          style={styles.callDirection}
+                          onPress={() => this._getDirection(location)}>
+                          <View style={styles.callButton}>
+                            <MaterialIcons name="directions" size={28} color="#ff7fc6" />
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </MapView.Callout>
+                  </MapView.Marker>
                 )
               }
-            })
+            }) : ''
           }
         </MapView>
       </View>
@@ -229,7 +317,28 @@ const styles = StyleSheet.create({
   searchButton: {
     flex: 1,
     marginLeft: 10
-  }
+  },
+  callout: {
+    flex: 1,
+    flexDirection: 'column'
+  },
+  callDirection: {
+    width: '100%',
+    alignItems: 'center',
+    padding: 10,
+    marginTop: 10,
+    flex: 1
+  },
+  callButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 5
+  },
 })
 
 const mapStateToProps = (state) => {
@@ -238,6 +347,6 @@ const mapStateToProps = (state) => {
   }
 }
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ setMarkers }, dispatch)
+const mapDispatchToProps = (dispatch) => bindActionCreators({ getMck }, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(MapScreen)
