@@ -23,6 +23,7 @@ import Expo, { MapView } from 'expo'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { getMck } from '../store/actions'
+import getDirections from 'react-native-google-maps-directions'
 
 const screen = Dimensions.get('window')
 
@@ -32,8 +33,8 @@ class DetailScreen extends Component {
     title: 'Detail'
   }
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       isOpen: false,
       swipeToClose: true,
@@ -42,7 +43,14 @@ class DetailScreen extends Component {
         title: '',
         star: 0,
         content: ''
-      }
+      },
+      reviewId: '',
+      isUpdate: false,
+      position: {
+        latitude: 0,
+        longitude: 0
+      },
+      mck: props.data.mck
     }
 
     this._showLocation = this._showLocation.bind(this)
@@ -51,25 +59,31 @@ class DetailScreen extends Component {
   }
 
   async _getPermission() {
-    const { Permissions } = Expo
+    const { Permissions, Location } = Expo
     const { status } = await Permissions.askAsync(Permissions.LOCATION)
 
     if (status === 'granted') {
-      this.setState({
-        enablePermission: true
-      })
+      Location.getCurrentPositionAsync({ enableHighAccuracy: true })
+        .then(res => {
+          this.setState({
+            position: {
+              latitude: res.coords.latitude,
+              longitude: res.coords.longitude
+            },
+            permissionStatus: true
+          })
+        })
+        .catch(err => console.log(err))
     } else {
       throw new Error('Location permission not granted')
     }
   }
 
   _showSharing() {
-    const mck = this.props.data.mck
-
     Share.share({
-      message: mck.description,
-      url: mck.images[0].uri,
-      title: mck.name
+      message: this.state.mck.description,
+      url: this.state.mck.images[0].uri,
+      title: this.state.mck.name
     }, {
         // Android
         dialogTitle: 'Sharing',
@@ -81,7 +95,28 @@ class DetailScreen extends Component {
   }
 
   _showRateReview() {
+    const { reviews } = this.state.mck
+    const user = this.props.data.user
+    const found = reviews.filter(review => review.userReview.userId === user.uid)
+    if (found.length > 0) {
+      const updatedReview = Object.assign({}, found[0], {
+        title: found[0].title,
+        star: found[0].rating,
+        content: found[0].review
+      })
+      console.log(found[0]._id)
+      this.setState({
+        review: updatedReview,
+        isUpdate: true,
+        reviewId: found[0]._id
+      })
+    }
+
     this.refs.modalRateReview.open()
+  }
+
+  _closeRateReview() {
+    this.refs.modalRateReview.close()
   }
 
   _showLocation() {
@@ -89,11 +124,74 @@ class DetailScreen extends Component {
     this._getPermission()
   }
 
+  _getDirection() {
+    if (this.state.permissionStatus) {
+      const { mck } = this.state
+      const data = {
+        source: this.state.position,
+        destination: mck.location,
+        params: [
+          {
+            key: "travelmode",
+            value: "driving" // may be "walking", "bicycling" or "transit" as well
+          },
+          {
+            key: "dir_action",
+            value: "navigate" // this instantly initializes navigation using the given travel mode
+          }
+        ]
+      }
+
+      getDirections(data)
+    }
+  }
+
   _ratingPress(rating) {
     const review = Object.assign({}, this.state.review, { star: rating })
     this.setState({
       review
     })
+  }
+
+  _updateReview(mck_id) {
+    let { title, content, star } = this.state.review
+    if (!title || !content || !star) {
+      Alert.alert('Fail', 'Please fill title, review, and give rating!')
+    } else {
+      let dataReview = {
+        title: this.state.review.title,
+        rating: this.state.review.star,
+        review: this.state.review.content,
+      }
+
+      Api.post(`mcks/review/update&review_id=${this.state.reviewId}`, dataReview)
+        .then(res => {
+          const { mck } = this.state
+          const updateReview = mck.reviews.map(review => {
+            if (review._id === this.state.reviewId) {
+              review.title = dataReview.title,
+                review.rating = dataReview.rating,
+                review.review = dataReview.review
+            }
+
+            return review
+          })
+
+          mck.reviews = updateReview
+          this.setState({
+            mck: mck,
+            isUpdate: false
+          })
+          Alert.alert('Success', 'Review has been updated')
+        }).catch(err => {
+          console.log(err)
+          Alert.alert('Fail', 'Review failed to being updated')
+        })
+
+      const review = Object.assign({}, this.state.review,
+        { title: '', star: 0, content: '' })
+      this.setState({ review })
+    }
   }
 
   _submitReview(mck_id) {
@@ -114,9 +212,12 @@ class DetailScreen extends Component {
 
       Api.post(`mcks/review&mck_id=${mck_id}`, dataReview)
         .then(res => {
-          let mck = this.props.data.mck
+          const { mck } = this.state
           mck.reviews.push(dataReview)
           this.props.getMck(mck)
+          this.setState({
+            mck: mck
+          })
           Alert.alert('Success', 'Review has been submit')
         }).catch(err => {
           console.log(err)
@@ -126,12 +227,11 @@ class DetailScreen extends Component {
       const review = Object.assign({}, this.state.review,
         { title: '', star: 0, content: '' })
       this.setState({ review })
-      setTimeout(() => this.refs.modalLocation.close(), 500)
     }
   }
 
   render() {
-    const mck = this.props.data.mck
+    const { mck } = this.state
     let user = {
       name: mck.userCreated.name,
       description: mck.userCreated.description,
@@ -216,6 +316,16 @@ class DetailScreen extends Component {
                 />
               </MapView>
             </View>
+            <View style={styles.submitView}>
+              <TouchableHighlight
+                style={styles.submitRateReview}
+                onPress={() => this._getDirection()}>
+                <View style={styles.submitButton}>
+                  <MaterialIcons name="map" size={28} color="white" />
+                  <Text style={styles.buttonText}>Direction</Text>
+                </View>
+              </TouchableHighlight>
+            </View>
           </Modal>
 
           <Modal
@@ -227,7 +337,7 @@ class DetailScreen extends Component {
               <Text
                 style={styles.modalTitle}>
                 RATE AND REVIEW
-            </Text>
+              </Text>
             </View>
             <View style={styles.ratingView}>
               <Text style={styles.ratingTitle}>Give me rating!</Text>
@@ -270,12 +380,29 @@ class DetailScreen extends Component {
               />
             </View>
             <View style={styles.submitView}>
+              {
+                !this.state.isUpdate ? <TouchableHighlight
+                  style={styles.submitRateReview}
+                  onPress={() => this._submitReview(mck._id)}>
+                  <View style={styles.submitButton}>
+                    <MaterialIcons name="save" size={28} color="white" />
+                    <Text style={styles.buttonText}>Submit</Text>
+                  </View>
+                </TouchableHighlight> : <TouchableHighlight
+                  style={styles.submitRateReview}
+                  onPress={() => this._updateReview(mck._id)}>
+                    <View style={styles.submitButton}>
+                      <MaterialIcons name="update" size={28} color="white" />
+                      <Text style={styles.buttonText}>Update</Text>
+                    </View>
+                  </TouchableHighlight>
+              }
               <TouchableHighlight
-                style={styles.submitRateReview}
-                onPress={() => this._submitReview(mck._id)}>
+                style={styles.closeRateReview}
+                onPress={() => this._closeRateReview()}>
                 <View style={styles.submitButton}>
-                  <MaterialIcons name="save" size={28} color="white" />
-                  <Text style={styles.buttonText}>Submit</Text>
+                  <MaterialIcons name="close" size={28} color="white" />
+                  <Text style={styles.buttonText}>Close</Text>
                 </View>
               </TouchableHighlight>
             </View>
@@ -347,7 +474,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ff7fc6',
     padding: 10,
-    marginBottom: 10
+    marginBottom: 10,
+    flex: 1
+  },
+  closeRateReview: {
+    alignItems: 'center',
+    backgroundColor: '#515151',
+    padding: 10,
+    marginBottom: 10,
+    flex: 1
   },
   modalView: {
     marginBottom: 10,
@@ -385,7 +520,9 @@ const styles = StyleSheet.create({
     borderColor: '#ddd'
   },
   submitView: {
-    width: '100%'
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   submitButton: {
     flexDirection: 'row',
@@ -400,11 +537,12 @@ const styles = StyleSheet.create({
   locationContainer: {
     borderWidth: 1,
     borderColor: '#ececec',
-    height: (screen.height - screen.height / 4) - 60,
-    width: screen.width - 20
+    height: (screen.height - screen.height / 4) - 100,
+    width: screen.width - 20,
+    marginBottom: 10
   },
   map: {
-    height: (screen.height - screen.height / 4) - 60,
+    height: (screen.height - screen.height / 4) - 100,
     width: screen.width - 20,
     borderWidth: 1,
     borderColor: '#ddd'

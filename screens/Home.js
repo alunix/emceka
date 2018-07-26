@@ -6,7 +6,7 @@ import Api from '../utils/Api'
 import * as firebase from 'firebase'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { setMcks, setUserLoggedIn, searchMcks, setMarkers } from '../store/actions'
+import { setMcks, setUserLoggedIn, searchMcks } from '../store/actions'
 
 class HomeScreen extends Component {
 
@@ -65,7 +65,6 @@ class HomeScreen extends Component {
       .then(() => {
         this.props.setUserLoggedIn({})
         this.props.setMcks([])
-        this.props.setMarkers([])
         this.props.navigation.navigate('Login')
         Alert.alert('Success', 'Thank you for using the app')
       })
@@ -134,6 +133,6 @@ const mapStateToProps = (state) => {
   }
 }
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ setMcks, setUserLoggedIn, searchMcks, setMarkers }, dispatch)
+const mapDispatchToProps = (dispatch) => bindActionCreators({ setMcks, setUserLoggedIn, searchMcks }, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen)

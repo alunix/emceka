@@ -1,32 +1,30 @@
-import React, { Component } from 'react'
-import { View, Text, FlatList, StyleSheet } from 'react-native'
+import React from 'react'
+import { View, Text, ScrollView, StyleSheet } from 'react-native'
 import StarRating from 'react-native-star-rating'
 import Separator from './Separator'
 
-class Review extends Component {
-
-  render() {
-    const { reviews } = this.props
-    return (
-      <View style={styles.reviewContainer}>
-        <Text
-          style={styles.reviewTitle}>
-          REVIEWS
+const Review = (props) => {
+  const { reviews } = props
+  return (
+    <View style={styles.reviewContainer}>
+      <Text
+        style={styles.reviewTitle}>
+        REVIEWS
       </Text>
-        <Separator color="#787878" />
-        {
-          reviews !== null ? <FlatList
-            data={reviews}
-            keyExtractor={(item, index) => String(index)}
-            renderItem={({ item }) => {
+      <Separator color="#787878" />
+      {
+        reviews !== null ? <ScrollView>
+          {
+            reviews.map((review, index) => {
               return (
                 <View
+                  key={index}
                   style={styles.reviewItem}>
                   <View style={styles.itemView}>
                     <Text
                       style={styles.itemUser}>
                       {
-                        item.userReview.name
+                        review.userReview.name
                       }
                     </Text>
                     <StarRating
@@ -34,7 +32,7 @@ class Review extends Component {
                       disabled={true}
                       maxStars={5}
                       starSize={16}
-                      rating={item.rating}
+                      rating={review.rating}
                       emptyStar={'star-border'}
                       fullStar={'star'}
                       halfStar={'star-half'}
@@ -44,16 +42,16 @@ class Review extends Component {
                   </View>
                   <Text
                     style={styles.itemComment}>
-                    {item.review}
+                    {review.review}
                   </Text>
                 </View>
               )
-            }}
-          /> : ''
-        }
-      </View>
-    )
-  }
+            })
+          }
+        </ScrollView> : ''
+      }
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
