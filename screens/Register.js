@@ -27,7 +27,6 @@ class RegisterScreen extends Component {
     this.state = {
       avatar: '',
       fullname: '',
-      desscription: '',
       email: '',
       password: '',
       errorMessage: ''
@@ -83,7 +82,7 @@ class RegisterScreen extends Component {
   }
 
   _signUp() {
-    let { avatar, fullname, description, email, password } = this.state
+    let { avatar, fullname, email, password } = this.state
     if (!fullname) {
       this.setState({
         errorMessage: 'Fullname still blank'
@@ -104,13 +103,6 @@ class RegisterScreen extends Component {
             displayName: fullname,
             photoURL: avatar.uri
           }).then(() => {
-            let dataUser = {
-              name: fullname,
-              avatar: avatar.uri,
-              description: description,
-              userId: user.uid,
-              email: user.email
-            }
             this.setState({ errorMessage: '' })
             this.props.navigation.navigate('Home')
             Alert.alert('Success', 'Your account has been created')
@@ -127,16 +119,16 @@ class RegisterScreen extends Component {
       <View style={styles.registerContainer}>
         <View style={styles.formContainer}>
           {
-            this.state.avatar ? <View style={styles.avatarContainer}>
+            this.state.avatar ? (<View style={styles.avatarContainer}>
               <View style={{ marginVertical: 10 }}>
                 <Image source={{ uri: this.state.avatar.uri }} style={styles.avatar} />
-              </View></View> : <View style={styles.avatarContainer}>
+              </View></View>) : (<View style={styles.avatarContainer}>
                 <TouchableOpacity
                   style={[styles.avatar, styles.avatarContainer]}
                   onPress={() => this._uploadAvatar()}>
                   <FontAwesome name="user-circle-o" size={64} color="#fff" />
                 </TouchableOpacity>
-              </View>
+              </View>)
           }
           <View style={{ padding: 10 }}>
             <TextInput
@@ -144,13 +136,7 @@ class RegisterScreen extends Component {
               onChangeText={(text) => this.setState({ fullname: text })}
               keyboardType="default"
               autoCapitalize="none"
-              style={styles.inputText}
-            />
-            <TextInput
-              placeholder="Fill the description"
-              onChangeText={(text) => this.setState({ desscription: text })}
-              keyboardType="default"
-              autoCapitalize="none"
+              underlineColorAndroid={'rgba(0,0,0,0)'}
               style={styles.inputText}
             />
             <TextInput
@@ -159,16 +145,18 @@ class RegisterScreen extends Component {
               keyboardType="email-address"
               textContentType="emailAddress"
               autoCapitalize="none"
+              underlineColorAndroid={'rgba(0,0,0,0)'}
               style={styles.inputText}
             />
             <TextInput
               placeholder="Fill the password"
               onChangeText={(text) => this.setState({ password: text })}
               secureTextEntry={true}
+              underlineColorAndroid={'rgba(0,0,0,0)'}
               style={styles.inputText}
             />
             {
-              this.state.errorMessage ? <Text style={styles.errorMessage}>{this.state.errorMessage}</Text> : ''
+              !!this.state.errorMessage && (<Text style={styles.errorMessage}>{this.state.errorMessage}</Text>)
             }
           </View>
         </View>

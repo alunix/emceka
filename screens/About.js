@@ -38,11 +38,11 @@ class AboutScreen extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1, padding: 10 }}>
-        <View style={{backgroundColor: '#fff', flex: 1, flexDirection: 'column'}}>
-        <Text style={{ padding: 10, color: '#fff', backgroundColor: '#ff7fc6', fontWeight: 'bold', textAlign: 'center' }}>EMCEKA App</Text>
-        <Text style={{marginVertical: 10, padding: 10}}>
-          Find the nearest loos/toilets, know the detail, give rating, add new place.
+      <View style={{ padding: 5 }}>
+        <View style={{ backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
+          <Text style={{ padding: 10, color: '#fff', backgroundColor: '#ff7fc6', fontWeight: 'bold', textAlign: 'center' }}>EMCEKA App</Text>
+          <Text style={{ marginVertical: 10, padding: 10 }}>
+            Find the nearest loos/toilets, know the detail, give rating, add new place.
         </Text>
         </View>
       </View>

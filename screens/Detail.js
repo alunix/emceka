@@ -365,6 +365,7 @@ class DetailScreen extends Component {
                   const review = Object.assign({}, this.state.review, { title: text })
                   this.setState({ review })
                 }}
+                underlineColorAndroid={'rgba(0,0,0,0)'}
                 value={this.state.review.title}
               />
               <Text style={styles.reviewTitle}>Give me review!</Text>
@@ -377,26 +378,27 @@ class DetailScreen extends Component {
                   const review = Object.assign({}, this.state.review, { content: text })
                   this.setState({ review })
                 }}
+                underlineColorAndroid={'rgba(0,0,0,0)'}
                 value={this.state.review.content}
               />
             </View>
             <View style={styles.submitView}>
               {
-                !this.state.isUpdate ? <TouchableHighlight
+                !this.state.isUpdate ? (<TouchableHighlight
                   style={styles.submitRateReview}
                   onPress={() => this._submitReview(mck._id)}>
                   <View style={styles.submitButton}>
                     <MaterialIcons name="save" size={28} color="white" />
                     <Text style={styles.buttonText}>Submit</Text>
                   </View>
-                </TouchableHighlight> : <TouchableHighlight
+                </TouchableHighlight>) : (<TouchableHighlight
                   style={styles.submitRateReview}
                   onPress={() => this._updateReview(mck._id)}>
-                    <View style={styles.submitButton}>
-                      <MaterialIcons name="update" size={28} color="white" />
-                      <Text style={styles.buttonText}>Update</Text>
-                    </View>
-                  </TouchableHighlight>
+                  <View style={styles.submitButton}>
+                    <MaterialIcons name="update" size={28} color="white" />
+                    <Text style={styles.buttonText}>Update</Text>
+                  </View>
+                </TouchableHighlight>)
               }
               <TouchableHighlight
                 style={styles.closeRateReview}

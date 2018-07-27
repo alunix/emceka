@@ -90,7 +90,6 @@ class HomeScreen extends Component {
   render() {
     return (
       <View style={styles.homeContainer}>
-        <StatusBar barStyle="light-content" hidden={false} />
         <View style={styles.searchContainer}>
           <View style={styles.searchView}>
             <TextInput

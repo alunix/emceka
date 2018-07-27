@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, TouchableHighlight, Text, StyleSheet, TextInput, TouchableOpacity, StatusBar, Alert, Image } from 'react-native'
-import { MaterialIcons, FontAwesome, Octicons } from '@expo/vector-icons'
+import { MaterialIcons, Octicons } from '@expo/vector-icons'
 import * as firebase from 'firebase'
 import { YOUR_FIREBASE_API_KEY, YOUR_FIREBASE_AUTH_DOMAIN, YOUR_FIREBASE_DATABSE_URL } from 'react-native-dotenv'
 
@@ -75,7 +75,6 @@ class LoginScreen extends Component {
   render() {
     return (
       <View style={styles.loginContainer}>
-        <StatusBar barStyle="light-content" hidden={false} />
         <View style={styles.formContainer}>
           <View style={styles.avatarContainer}>
             <View style={{ marginVertical: 10 }}>
@@ -92,16 +91,18 @@ class LoginScreen extends Component {
               keyboardType="email-address"
               textContentType="emailAddress"
               autoCapitalize="none"
+              underlineColorAndroid={'rgba(0,0,0,0)'}
               style={styles.inputText}
             />
             <TextInput
               placeholder="Fill the password"
               onChangeText={(text) => this.setState({ password: text })}
               secureTextEntry={true}
+              underlineColorAndroid={'rgba(0,0,0,0)'}
               style={styles.inputText}
             />
             {
-              this.state.errorMessage ? <Text style={styles.errorMessage}>{this.state.errorMessage}</Text> : ''
+              !!this.state.errorMessage && (<Text style={styles.errorMessage}>{this.state.errorMessage}</Text>)
             }
           </View>
         </View>

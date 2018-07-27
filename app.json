@@ -2,7 +2,7 @@
   "expo": {
     "sdkVersion": "27.0.0",
     "name": "EMCEKA",
-    "description": "Find the toilets easily",
+    "description": "Throw \"it\" in the right place",
     "icon": "./assets/splash.png",
     "version": "1.0.0",
     "slug": "emceka",
@@ -10,7 +10,7 @@
       "ios",
       "android"
     ],
-    "primaryColor": "#7274e5",
+    "primaryColor": "#7f81ff",
     "ios": {
       "bundleIdentifier": "id.ekoteguhw.emceka",
       "config": {
@@ -19,21 +19,23 @@
     },
     "android": {
       "package": "id.ekoteguhw.emceka",
-      "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "CAMERA"
-      ],
       "config": {
         "googleMaps": {
           "apiKey": "YOUR_GOOGLE_MAPS_API"
         }
-      }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     }
   },
   "splash": {
     "image": "./assets/splash.png",
-    "backgroundColor": "#7f81ff",
+    "backgroundColor": "#4f51a0",
     "resizeMode": "contain"
   }
 }

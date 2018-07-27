@@ -4,7 +4,6 @@ import {
   createStackNavigator,
   createSwitchNavigator,
   createBottomTabNavigator,
-  createMaterialTopTabNavigator
 } from 'react-navigation'
 import {
   HomeScreen,
@@ -109,7 +108,7 @@ const TabIOSStack = createBottomTabNavigator({
     swipeEnabled: true
   })
 
-const TabAndroidStack = createMaterialTopTabNavigator({
+const TabAndroidStack = createBottomTabNavigator({
   Home: AppStack,
   Map: MapStack,
   About: AboutScreen

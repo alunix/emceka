@@ -10,7 +10,8 @@ import {
   SegmentedControlIOS,
   Image,
   Alert,
-  StatusBar
+  StatusBar,
+  Platform
 } from 'react-native'
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Swiper from 'react-native-swiper'
@@ -20,6 +21,7 @@ import { YOUR_API_FOR_UPLOAD, YOUR_UPLOAD_PRESET } from 'react-native-dotenv'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { setMcks } from '../store/actions'
+import SegmentedControlTab from 'react-native-segmented-control-tab'
 
 class AddMckScreen extends Component {
 
@@ -99,7 +101,7 @@ class AddMckScreen extends Component {
       const newMck = {
         name: this.state.name,
         description: this.state.description,
-        slug: this.state.name.split(' ').join('-') + '-' + Date.now(),
+        slug: this.state.name.toLocaleLowerCase().split(' ').join('-') + '-' + Date.now(),
         address: this.state.address,
         facilities: {
           room: {
@@ -222,11 +224,11 @@ class AddMckScreen extends Component {
         <StatusBar barStyle="light-content" hidden={false} />
         <View style={styles.imageContainer}>
           {
-            images && <Swiper height={250}>
+            !!images && (<Swiper height={250}>
               {
                 images.map((image, index) => <Image key={index} source={{ uri: image.uri }} style={styles.showImage} />)
               }
-            </Swiper>
+            </Swiper>)
           }
         </View>
         <View style={styles.addMckContainer}>
@@ -251,6 +253,7 @@ class AddMckScreen extends Component {
             autoCapitalize="none"
             onChangeText={(text) => this.setState({ name: text })}
             value={this.state.name}
+            underlineColorAndroid={'rgba(0,0,0,0)'}
             style={styles.inputText} />
           <Text style={styles.inputTitle}>Description</Text>
           <TextInput
@@ -258,6 +261,7 @@ class AddMckScreen extends Component {
             autoCapitalize="none"
             onChangeText={(text) => this.setState({ description: text })}
             value={this.state.description}
+            underlineColorAndroid={'rgba(0,0,0,0)'}
             style={styles.inputText} />
           <Text style={styles.inputTitle}>Address</Text>
           <TextInput
@@ -265,6 +269,7 @@ class AddMckScreen extends Component {
             autoCapitalize="none"
             onChangeText={(text) => this.setState({ address: text })}
             value={this.state.address}
+            underlineColorAndroid={'rgba(0,0,0,0)'}
             style={styles.inputText} />
 
           <Text style={styles.inputTitle}>Facilities</Text>
@@ -280,6 +285,7 @@ class AddMckScreen extends Component {
                   this.setState({ room })
                 }}
                 value={String(this.state.room.flush)}
+                underlineColorAndroid={'rgba(0,0,0,0)'}
                 style={styles.inputTextFacility} />
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
@@ -292,6 +298,7 @@ class AddMckScreen extends Component {
                   this.setState({ room })
                 }}
                 value={String(this.state.room.squat)}
+                underlineColorAndroid={'rgba(0,0,0,0)'}
                 style={styles.inputTextFacility} />
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
@@ -304,6 +311,7 @@ class AddMckScreen extends Component {
                   this.setState({ room })
                 }}
                 value={String(this.state.room.bath)}
+                underlineColorAndroid={'rgba(0,0,0,0)'}
                 style={styles.inputTextFacility} />
             </View>
           </View>
@@ -312,73 +320,137 @@ class AddMckScreen extends Component {
             <Text style={styles.inputTitleNotBold}>Others</Text>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
               <Text style={styles.inputTitleNotBold}>Has Mirror</Text>
-              <SegmentedControlIOS
-                values={['No', 'Yes']}
-                tintColor={'#7f81ff'}
-                selectedIndex={this.state.selectedIndex.hasMirror}
-                height={30}
-                style={{ flex: 1, marginVertical: 10 }}
-                onChange={(e) => {
-                  const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasMirror: e.nativeEvent.selectedSegmentIndex })
-                  this.setState({ selectedIndex })
-                }}
-              />
+              {
+                Platform.select({
+                  ios: <SegmentedControlIOS
+                    values={['No', 'Yes']}
+                    tintColor={'#7f81ff'}
+                    selectedIndex={this.state.selectedIndex.hasMirror}
+                    height={30}
+                    style={{ flex: 1, marginVertical: 10 }}
+                    onChange={(e) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasMirror: e.nativeEvent.selectedSegmentIndex })
+                      this.setState({ selectedIndex })
+                    }} />,
+                  android: <View style={{ marginVertical: 10, flex: 1 }}><SegmentedControlTab
+                    values={['No', 'Yes']}
+                    selectedIndex={this.state.selectedIndex.hasMirror}
+                    tabStyle={{ borderColor: '#7f81ff' }}
+                    activeTabStyle={{ backgroundColor: '#7f81ff' }}
+                    onTabPress={(index) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasMirror: index })
+                      this.setState({ selectedIndex })
+                    }} /></View>
+                })
+              }
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
               <Text style={styles.inputTitleNotBold}>Has Soap</Text>
-              <SegmentedControlIOS
-                values={['No', 'Yes']}
-                tintColor={'#7f81ff'}
-                selectedIndex={this.state.selectedIndex.hasSoap}
-                height={30}
-                style={{ flex: 1, marginVertical: 10 }}
-                onChange={(e) => {
-                  const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasSoap: e.nativeEvent.selectedSegmentIndex })
-                  this.setState({ selectedIndex })
-                }}
-              />
+              {
+                Platform.select({
+                  ios: <SegmentedControlIOS
+                    values={['No', 'Yes']}
+                    tintColor={'#7f81ff'}
+                    selectedIndex={this.state.selectedIndex.hasSoap}
+                    height={30}
+                    style={{ flex: 1, marginVertical: 10 }}
+                    onChange={(e) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasSoap: e.nativeEvent.selectedSegmentIndex })
+                      this.setState({ selectedIndex })
+                    }}
+                  />,
+                  android: <View style={{ marginVertical: 10, flex: 1 }}><SegmentedControlTab
+                    values={['No', 'Yes']}
+                    selectedIndex={this.state.selectedIndex.hasSoap}
+                    tabStyle={{ borderColor: '#7f81ff' }}
+                    activeTabStyle={{ backgroundColor: '#7f81ff' }}
+                    onTabPress={(index) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasSoap: index })
+                      this.setState({ selectedIndex })
+                    }} /></View>
+                })
+              }
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
               <Text style={styles.inputTitleNotBold}>Has Tissue</Text>
-              <SegmentedControlIOS
-                values={['No', 'Yes']}
-                tintColor={'#7f81ff'}
-                selectedIndex={this.state.selectedIndex.hasTissue}
-                height={30}
-                style={{ flex: 1, marginVertical: 10 }}
-                onChange={(e) => {
-                  const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTissue: e.nativeEvent.selectedSegmentIndex })
-                  this.setState({ selectedIndex })
-                }}
-              />
+              {
+                Platform.select({
+                  ios: <SegmentedControlIOS
+                    values={['No', 'Yes']}
+                    tintColor={'#7f81ff'}
+                    selectedIndex={this.state.selectedIndex.hasTissue}
+                    height={30}
+                    style={{ flex: 1, marginVertical: 10 }}
+                    onChange={(e) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTissue: e.nativeEvent.selectedSegmentIndex })
+                      this.setState({ selectedIndex })
+                    }}
+                  />,
+                  android: <View style={{ marginVertical: 10, flex: 1 }}><SegmentedControlTab
+                    values={['No', 'Yes']}
+                    selectedIndex={this.state.selectedIndex.hasTissue}
+                    tabStyle={{ borderColor: '#7f81ff' }}
+                    activeTabStyle={{ backgroundColor: '#7f81ff' }}
+                    onTabPress={(index) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTissue: index })
+                      this.setState({ selectedIndex })
+                    }} /></View>
+                })
+              }
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
               <Text style={styles.inputTitleNotBold}>Has Trash</Text>
-              <SegmentedControlIOS
-                values={['No', 'Yes']}
-                tintColor={'#7f81ff'}
-                selectedIndex={this.state.selectedIndex.hasTrash}
-                height={30}
-                style={{ flex: 1, marginVertical: 10 }}
-                onChange={(e) => {
-                  const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTrash: e.nativeEvent.selectedSegmentIndex })
-                  this.setState({ selectedIndex })
-                }}
-              />
+              {
+                Platform.select({
+                  ios: <SegmentedControlIOS
+                    values={['No', 'Yes']}
+                    tintColor={'#7f81ff'}
+                    selectedIndex={this.state.selectedIndex.hasTrash}
+                    height={30}
+                    style={{ flex: 1, marginVertical: 10 }}
+                    onChange={(e) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTrash: e.nativeEvent.selectedSegmentIndex })
+                      this.setState({ selectedIndex })
+                    }}
+                  />,
+                  android: <View style={{ marginVertical: 10, flex: 1 }}><SegmentedControlTab
+                    values={['No', 'Yes']}
+                    selectedIndex={this.state.selectedIndex.hasTrash}
+                    tabStyle={{ borderColor: '#7f81ff' }}
+                    activeTabStyle={{ backgroundColor: '#7f81ff' }}
+                    onTabPress={(index) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasTrash: index })
+                      this.setState({ selectedIndex })
+                    }} /></View>
+                })
+              }
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
               <Text style={styles.inputTitleNotBold}>Has Shower</Text>
-              <SegmentedControlIOS
-                values={['No', 'Yes']}
-                tintColor={'#7f81ff'}
-                selectedIndex={this.state.selectedIndex.hasShower}
-                height={30}
-                style={{ flex: 1, marginVertical: 10 }}
-                onChange={(e) => {
-                  const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasShower: e.nativeEvent.selectedSegmentIndex })
-                  this.setState({ selectedIndex })
-                }}
-              />
+              {
+                Platform.select({
+                  ios: <SegmentedControlIOS
+                    values={['No', 'Yes']}
+                    tintColor={'#7f81ff'}
+                    selectedIndex={this.state.selectedIndex.hasShower}
+                    height={30}
+                    style={{ flex: 1, marginVertical: 10 }}
+                    onChange={(e) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasShower: e.nativeEvent.selectedSegmentIndex })
+                      this.setState({ selectedIndex })
+                    }}
+                  />,
+                  android: <View style={{ marginVertical: 10, flex: 1 }}><SegmentedControlTab
+                    values={['No', 'Yes']}
+                    selectedIndex={this.state.selectedIndex.hasShower}
+                    tabStyle={{ borderColor: '#7f81ff' }}
+                    activeTabStyle={{ backgroundColor: '#7f81ff' }}
+                    onTabPress={(index) => {
+                      const selectedIndex = Object.assign({}, this.state.selectedIndex, { hasShower: index })
+                      this.setState({ selectedIndex })
+                    }} /></View>
+                })
+              }
             </View>
           </View>
         </View>
