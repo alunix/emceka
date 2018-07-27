@@ -36,7 +36,7 @@ const Mck = (props) => {
 
 const styles = StyleSheet.create({
   cardContainer: {
-    marginBottom: 10,
+    marginBottom: 5,
     borderColor: '#ddd',
     backgroundColor: '#fff',
     borderWidth: 1,

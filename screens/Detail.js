@@ -97,14 +97,15 @@ class DetailScreen extends Component {
   _showRateReview() {
     const { reviews } = this.state.mck
     const user = this.props.data.user
-    const found = reviews.filter(review => review.userReview.userId === user.uid)
+    const found = reviews.filter(review => review.userReview.userId == user.uid)
+
     if (found.length > 0) {
       const updatedReview = Object.assign({}, found[0], {
         title: found[0].title,
         star: found[0].rating,
         content: found[0].review
       })
-      console.log(found[0]._id)
+
       this.setState({
         review: updatedReview,
         isUpdate: true,
@@ -168,7 +169,7 @@ class DetailScreen extends Component {
         .then(res => {
           const { mck } = this.state
           const updateReview = mck.reviews.map(review => {
-            if (review._id === this.state.reviewId) {
+            if (review._id == this.state.reviewId) {
               review.title = dataReview.title,
                 review.rating = dataReview.rating,
                 review.review = dataReview.review
@@ -415,7 +416,7 @@ class DetailScreen extends Component {
 
 const styles = StyleSheet.create({
   detailContainer: {
-    padding: 10,
+    padding: 5,
     flex: 1
   },
   detailView: {

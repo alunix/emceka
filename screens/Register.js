@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   registerContainer: {
     display: 'flex',
-    padding: 10
+    padding: 5
   },
   inputText: {
     padding: 10,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#7f81ff'
+    backgroundColor: '#989aff'
   },
   avatar: {
     width: 100,

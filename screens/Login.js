@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableHighlight, Text, StyleSheet, TextInput, TouchableOpacity, StatusBar, Alert } from 'react-native'
+import { View, TouchableHighlight, Text, StyleSheet, TextInput, TouchableOpacity, StatusBar, Alert, Image } from 'react-native'
 import { MaterialIcons, FontAwesome, Octicons } from '@expo/vector-icons'
 import * as firebase from 'firebase'
 import { YOUR_FIREBASE_API_KEY, YOUR_FIREBASE_AUTH_DOMAIN, YOUR_FIREBASE_DATABSE_URL } from 'react-native-dotenv'
@@ -79,7 +79,10 @@ class LoginScreen extends Component {
         <View style={styles.formContainer}>
           <View style={styles.avatarContainer}>
             <View style={{ marginVertical: 10 }}>
-              <FontAwesome name="user-circle-o" size={64} color="#fff" />
+              <Image
+                source={require('../assets/splash.png')}
+                style={{ width: 64, height: 64 }}
+              />
             </View>
           </View>
           <View style={{ padding: 10 }}>
@@ -131,7 +134,7 @@ class LoginScreen extends Component {
 const styles = StyleSheet.create({
   loginContainer: {
     display: 'flex',
-    padding: 10
+    padding: 5
   },
   formContainer: {
     backgroundColor: '#fff'
@@ -155,7 +158,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#7f81ff'
+    backgroundColor: '#989aff'
   },
 })
 

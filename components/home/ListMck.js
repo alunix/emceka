@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { FlatList, TouchableWithoutFeedback, View } from 'react-native'
+import { ScrollView, TouchableWithoutFeedback, View } from 'react-native'
 import Mck from './Mck'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
@@ -15,19 +15,22 @@ class ListMck extends Component {
   render() {
     const { mcks } = this.props
     return (
-      <FlatList
-        data={mcks}
-        renderItem={({ item }) =>
-          <TouchableWithoutFeedback
-            onPress={() => this._getMck(item)}
-            useForeground={false}>
-            <View>
-              <Mck mck={item} />
-            </View>
-          </TouchableWithoutFeedback>
+      <ScrollView>
+        {
+          mcks.map(mck => {
+            return (
+              <TouchableWithoutFeedback
+                key={mck._id}
+                onPress={() => this._getMck(mck)}
+                useForeground={false}>
+                <View>
+                  <Mck mck={mck} />
+                </View>
+              </TouchableWithoutFeedback>
+            )
+          })
         }
-        keyExtractor={item => item._id}
-      />
+      </ScrollView>
     )
   }
 }

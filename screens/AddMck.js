@@ -53,55 +53,98 @@ class AddMckScreen extends Component {
     }
   }
 
+  _refreshForm() {
+    const selectedIndex = Object.assign({}, this.state.selectedIndex, {
+      hasMirror: 0,
+      hasSoap: 0,
+      hasTissue: 0,
+      hasTrash: 0,
+      hasShower: 0
+    })
+
+    const room = Object.assign({}, this.state.room, {
+      flush: 0,
+      squat: 0,
+      bath: 0
+    })
+
+    const location = Object.assign({}, this.state.location, {
+      latitude: 0,
+      longitude: 0
+    })
+
+    this.setState({
+      selectedIndex,
+      images: null,
+      name: '',
+      description: '',
+      address: '',
+      room,
+      location
+    })
+  }
+
   _submitMck() {
     const user = this.props.data.user
-    const newMck = {
-      name: this.state.name,
-      description: this.state.description,
-      slug: this.state.name.split(' ').join('-') + '-' + Date.now(),
-      address: this.state.address,
-      facilities: {
-        room: {
-          flush: {
-            sum: this.state.room.flush
-          },
-          squat: {
-            sum: this.state.room.squat
-          },
-          bath: {
-            sum: this.state.room.bath,
-            hasShower: this.state.selectedIndex.hasShower == 1 ? true : false
-          },
-          hasMirror: this.state.selectedIndex.hasMirror == 1 ? true : false,
-          hasSoap: this.state.selectedIndex.hasSoap == 1 ? true : false,
-          hasTissue: this.state.selectedIndex.hasTissue == 1 ? true : false,
-          hasTrash: this.state.selectedIndex.hasTrash == 1 ? true : false
-        }
-      },
-      images: this.state.images,
-      location: {
-        latitude: this.state.location.latitude,
-        longitude: this.state.location.longitude
-      },
-      reviews: [],
-      userCreated: {
-        userId: user.uid,
-        name: user.displayName,
-        avatar: user.photoURL
-      }
-    }
+    const {
+      name,
+      description,
+      address,
+      images,
+    } = this.state
 
-    Api.post(`mcks/create`, newMck)
-      .then(res => {
-        let mcks = this.props.data.mcks
-        mcks.push(newMck)
-        this.props.setMcks(mcks)
-        Alert.alert('Success', 'Your request has been submit.')
-        this.props.navigation.goBack(null)
-      })
-      .catch(err => {
-        Alert.alert('Fail', 'Your request failed.')
-      })
+    if (!name || !description || !address || !images) {
+      Alert.alert('Error', 'Please fill the form before submit data')
+    } else {
+      const newMck = {
+        name: this.state.name,
+        description: this.state.description,
+        slug: this.state.name.split(' ').join('-') + '-' + Date.now(),
+        address: this.state.address,
+        facilities: {
+          room: {
+            flush: {
+              sum: this.state.room.flush
+            },
+            squat: {
+              sum: this.state.room.squat
+            },
+            bath: {
+              sum: this.state.room.bath,
+              hasShower: this.state.selectedIndex.hasShower == 1 ? true : false
+            },
+            hasMirror: this.state.selectedIndex.hasMirror == 1 ? true : false,
+            hasSoap: this.state.selectedIndex.hasSoap == 1 ? true : false,
+            hasTissue: this.state.selectedIndex.hasTissue == 1 ? true : false,
+            hasTrash: this.state.selectedIndex.hasTrash == 1 ? true : false
+          }
+        },
+        images: this.state.images,
+        location: {
+          latitude: this.state.location.latitude,
+          longitude: this.state.location.longitude
+        },
+        reviews: [],
+        userCreated: {
+          userId: user.uid,
+          name: user.displayName,
+          avatar: user.photoURL
+        }
+      }
+
+      Api.post(`mcks/create`, newMck)
+        .then(res => {
+          let mcks = this.props.data.mcks
+          mcks.push(newMck)
+          this.props.setMcks(mcks)
+          Alert.alert('Success', 'Your request has been submit.')
+          //this.props.navigation.goBack(null)
+          this._refreshForm()
+        })
+        .catch(err => {
+          Alert.alert('Fail', 'Your request failed.')
+        })
+    }
   }
 
   async _getCurrentLocation() {
@@ -117,6 +160,7 @@ class AddMckScreen extends Component {
               longitude: res.coords.longitude
             }
           })
+          Alert.alert('Success', 'Location has been set')
         })
         .catch(err => console.log(err))
     } else {
@@ -206,18 +250,21 @@ class AddMckScreen extends Component {
             placeholder="Fill the name"
             autoCapitalize="none"
             onChangeText={(text) => this.setState({ name: text })}
+            value={this.state.name}
             style={styles.inputText} />
           <Text style={styles.inputTitle}>Description</Text>
           <TextInput
             placeholder="Fill the description"
             autoCapitalize="none"
             onChangeText={(text) => this.setState({ description: text })}
+            value={this.state.description}
             style={styles.inputText} />
           <Text style={styles.inputTitle}>Address</Text>
           <TextInput
             placeholder="Fill the address"
             autoCapitalize="none"
             onChangeText={(text) => this.setState({ address: text })}
+            value={this.state.address}
             style={styles.inputText} />
 
           <Text style={styles.inputTitle}>Facilities</Text>
@@ -232,6 +279,7 @@ class AddMckScreen extends Component {
                   const room = Object.assign({}, this.state.room, { flush: text })
                   this.setState({ room })
                 }}
+                value={String(this.state.room.flush)}
                 style={styles.inputTextFacility} />
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
@@ -243,6 +291,7 @@ class AddMckScreen extends Component {
                   const room = Object.assign({}, this.state.room, { squat: text })
                   this.setState({ room })
                 }}
+                value={String(this.state.room.squat)}
                 style={styles.inputTextFacility} />
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}>
@@ -254,6 +303,7 @@ class AddMckScreen extends Component {
                   const room = Object.assign({}, this.state.room, { bath: text })
                   this.setState({ room })
                 }}
+                value={String(this.state.room.bath)}
                 style={styles.inputTextFacility} />
             </View>
           </View>
@@ -354,7 +404,7 @@ class AddMckScreen extends Component {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    padding: 10,
+    padding: 5,
     flex: 1,
     flexDirection: 'column'
   },

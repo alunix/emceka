@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, StatusBar, Alert, TextInput } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, StatusBar, Alert, TextInput, Image } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { ListMck } from '../components/home'
 import Api from '../utils/Api'
@@ -12,7 +12,13 @@ class HomeScreen extends Component {
 
   static navigationOptions = ({ navigation }) => {
     return {
-      title: 'EMCEKA',
+      headerTitle: <TouchableOpacity
+        onPress={navigation.getParam('refreshHome')}>
+        <Image
+          source={require('../assets/splash.png')}
+          style={{ width: 30, height: 30 }}
+        />
+      </TouchableOpacity>,
       headerLeft: (
         <TouchableOpacity
           style={{ paddingLeft: 10 }}
@@ -38,10 +44,15 @@ class HomeScreen extends Component {
     this._addMck = this._addMck.bind(this)
     this._signOut = this._signOut.bind(this)
     this._searchMcks = this._searchMcks.bind(this)
+    this._refreshHome = this._refreshHome.bind(this)
   }
 
   componentDidMount() {
-    this.props.navigation.setParams({ addMck: this._addMck, signOut: this._signOut })
+    this.props.navigation.setParams({ addMck: this._addMck, signOut: this._signOut, refreshHome: this._refreshHome })
+    this._getData()
+  }
+
+  _refreshHome() {
     this._getData()
   }
 
@@ -107,7 +118,8 @@ const styles = StyleSheet.create({
 
   },
   listContainer: {
-    padding: 10
+    padding: 5,
+    marginBottom: 100
   },
   searchContainer: {
     backgroundColor: '#fff',
