@@ -33,14 +33,14 @@ class AboutScreen extends Component {
   }
 
   _mainMenu() {
-    Alert.alert('Info', 'Emceka version 1.0.0')
+    Alert.alert('Info', 'ToiRate version 1.0.0')
   }
 
   render() {
     return (
       <View style={{ padding: 5 }}>
         <View style={{ backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
-          <Text style={{ padding: 10, color: '#fff', backgroundColor: '#ff7fc6', fontWeight: 'bold', textAlign: 'center' }}>EMCEKA App</Text>
+          <Text style={{ padding: 10, color: '#fff', backgroundColor: '#ff7fc6', fontWeight: 'bold', textAlign: 'center' }}>ToiRate App</Text>
           <Text style={{ marginVertical: 10, padding: 10 }}>
             Find the nearest loos/toilets, know the detail, give rating, add new place.
         </Text>

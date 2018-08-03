@@ -16,7 +16,12 @@ class LoginScreen extends Component {
 
   static navigationOptions = ({ navigation }) => {
     return {
-      title: 'Sign In',
+      headerTitle: (
+        <Image
+          source={require('../assets/nav.png')}
+          style={{ width: 30, height: 30 }}
+        />
+      ),
       headerLeft: (
         <TouchableOpacity
           style={{ paddingLeft: 10 }}
@@ -44,7 +49,7 @@ class LoginScreen extends Component {
   }
 
   _aboutApp() {
-    Alert.alert('About Emceka', 'Emceka version 1.0.0')
+    Alert.alert('About ToiRate', 'ToiRate version 1.0.0')
   }
 
   _signIn() {
@@ -62,7 +67,7 @@ class LoginScreen extends Component {
         .then(() => {
           this.setState({ errorMessage: '' })
           this.props.navigation.navigate('Home')
-          Alert.alert('Success', 'Welcome to Emceka App')
+          Alert.alert('Success', 'Welcome to ToiRate')
         })
         .catch(err => {
           this.setState({ errorMessage: err.message })
@@ -75,15 +80,11 @@ class LoginScreen extends Component {
   render() {
     return (
       <View style={styles.loginContainer}>
+        <StatusBar
+          backgroundColor="#4c4d99"
+          barStyle="light-content"
+          hidden={false} />
         <View style={styles.formContainer}>
-          <View style={styles.avatarContainer}>
-            <View style={{ marginVertical: 10 }}>
-              <Image
-                source={require('../assets/splash.png')}
-                style={{ width: 64, height: 64 }}
-              />
-            </View>
-          </View>
           <View style={{ padding: 10 }}>
             <TextInput
               placeholder="Fill the email"
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#989aff'
+    backgroundColor: '#ff7fc6'
   },
 })
 

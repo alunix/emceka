@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Alert, StyleSheet, TextInput, Text, TouchableHighlight, Image, } from 'react-native'
+import { View, TouchableOpacity, Alert, StyleSheet, TextInput, Text, TouchableHighlight, Image, StatusBar } from 'react-native'
 import { MaterialIcons, FontAwesome, Octicons } from '@expo/vector-icons'
 import Expo, { ImagePicker } from 'expo'
 import Api from '../utils/Api'
@@ -10,7 +10,12 @@ class RegisterScreen extends Component {
 
   static navigationOptions = ({ navigation }) => {
     return {
-      title: 'Sign Up',
+      headerTitle: (
+        <Image
+          source={require('../assets/nav.png')}
+          style={{ width: 30, height: 30 }}
+        />
+      ),
       headerRight: (
         <TouchableOpacity
           style={{ paddingRight: 10 }}
@@ -40,7 +45,7 @@ class RegisterScreen extends Component {
   }
 
   _aboutApp() {
-    Alert.alert('About Emceka', 'Emceka version 1.0.0')
+    Alert.alert('About ToiRate', 'ToiRate version 1.0.0')
   }
 
   async _uploadAvatar() {
@@ -117,6 +122,10 @@ class RegisterScreen extends Component {
   render() {
     return (
       <View style={styles.registerContainer}>
+        <StatusBar
+          backgroundColor="#4c4d99"
+          barStyle="light-content"
+          hidden={false} />
         <View style={styles.formContainer}>
           {
             this.state.avatar ? (<View style={styles.avatarContainer}>
@@ -204,7 +213,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#989aff'
+    backgroundColor: '#777'
   },
   avatar: {
     width: 100,

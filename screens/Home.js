@@ -15,7 +15,7 @@ class HomeScreen extends Component {
       headerTitle: <TouchableOpacity
         onPress={navigation.getParam('refreshHome')}>
         <Image
-          source={require('../assets/splash.png')}
+          source={require('../assets/nav.png')}
           style={{ width: 30, height: 30 }}
         />
       </TouchableOpacity>,
@@ -90,6 +90,9 @@ class HomeScreen extends Component {
   render() {
     return (
       <View style={styles.homeContainer}>
+        <StatusBar
+          backgroundColor="#4c4d99"
+          barStyle="light-content" />
         <View style={styles.searchContainer}>
           <View style={styles.searchView}>
             <TextInput
@@ -122,10 +125,10 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     backgroundColor: '#fff',
-    marginBottom: 5
+    padding: 5
   },
   searchView: {
-    padding: 10,
+    padding: 5,
     display: 'flex',
     flexDirection: 'row'
   },
@@ -134,7 +137,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
-    padding: 5
+    padding: 5,
+    height: 32,
+    color: '#5d5d5d',
   }
 })
 

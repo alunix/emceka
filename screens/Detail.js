@@ -10,7 +10,8 @@ import {
   TextInput,
   Share,
   StyleSheet,
-  Alert
+  Alert,
+  StatusBar
 } from 'react-native'
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { Rating, Review, Facility, User } from '../components/detail'
@@ -242,6 +243,10 @@ class DetailScreen extends Component {
 
     return (
       <ScrollView style={styles.detailContainer}>
+        <StatusBar
+          backgroundColor="#4c4d99"
+          barStyle="light-content"
+          hidden={false} />
         <View style={styles.detailView}>
           <Swiper height={250}>
             {

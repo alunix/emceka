@@ -1,27 +1,33 @@
 {
   "expo": {
     "sdkVersion": "27.0.0",
-    "name": "EMCEKA",
+    "name": "ToiRate",
     "description": "Throw \"it\" in the right place",
-    "icon": "./assets/splash.png",
+    "icon": "./assets/icon.png",
     "version": "1.0.0",
-    "slug": "emceka",
+    "privacy": "public",
+    "slug": "toirate",
     "platforms": [
       "ios",
       "android"
     ],
     "primaryColor": "#7f81ff",
     "ios": {
-      "bundleIdentifier": "id.ekoteguhw.emceka",
+      "bundleIdentifier": "id.ekoteguhw.toirate",
       "config": {
-        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API"
+        "googleMapsApiKey": "YOUR_GOOGLE_MAP_API"
+      },
+      "splash": {
+        "image": "./assets/splash.png",
+        "backgroundColor": "#7f81ff",
+        "resizeMode": "contain"
       }
     },
     "android": {
-      "package": "id.ekoteguhw.emceka",
+      "package": "id.ekoteguhw.toirate",
       "config": {
         "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAPS_API"
+          "apiKey": "YOUR_GOOGLE_MAP_API"
         }
       },
       "permissions": [
@@ -30,12 +36,25 @@
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
-      ]
+      ],
+      "splash": {
+        "backgroundColor": "#7f81ff",
+        "resizeMode": "contain",
+        "mdpi": "./assets/android/drawable-mdpi/splash.png",
+        "hdpi": "./assets/android/drawable-hdpi/splash.png",
+        "xhdpi": "./assets/android/drawable-xhdpi/splash.png",
+        "xxhdpi": "./assets/android/drawable-xxhdpi/splash.png",
+        "xxxhdpi": "./assets/android/drawable-xxxhdpi/splash.png"
+      }
     }
   },
   "splash": {
     "image": "./assets/splash.png",
-    "backgroundColor": "#4f51a0",
-    "resizeMode": "contain"
+    "backgroundColor": "#7f81ff",
+    "resizeMode": "cover"
+  },
+  "androidStatusBar": {
+    "barStyle": "light-content",
+    "backgroundColor": "#4c4d99"
   }
 }

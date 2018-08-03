@@ -221,7 +221,10 @@ class AddMckScreen extends Component {
     const { images } = this.state
     return (
       <ScrollView style={styles.mainContainer}>
-        <StatusBar barStyle="light-content" hidden={false} />
+        <StatusBar
+          backgroundColor="#4c4d99"
+          barStyle="light-content"
+          hidden={false} />
         <View style={styles.imageContainer}>
           {
             !!images && (<Swiper height={250}>

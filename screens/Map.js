@@ -5,11 +5,11 @@ import {
     Platform,
     StatusBar,
     StyleSheet,
-    TextInput,
+    Alert,
     Dimensions,
     Text
 } from 'react-native'
-import { MaterialCommunityIcons, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
+import { MaterialCommunityIcons, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import Expo, { MapView } from 'expo'
 import haversine from 'haversine'
 import { calculateRating } from '../utils/Common'
@@ -18,6 +18,8 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { getMck } from '../store/actions'
 import getDirections from 'react-native-google-maps-directions'
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
+import { YOUR_GOOGLE_MAPS_API_LOCATION } from 'react-native-dotenv'
 
 class MapScreen extends Component {
 
@@ -42,8 +44,8 @@ class MapScreen extends Component {
                     onPress={navigation.getParam('locateMe')}>
                     {
                         Platform.select({
-                            ios: <Ionicons name="ios-refresh" size={24} color="white" />,
-                            android: <FontAwesome name="refresh" size={24} color="white" />
+                            ios: <Ionicons name="ios-locate" size={24} color="white" />,
+                            android: <MaterialIcons name="my-location" size={24} color="white" />
                         })
                     }
                 </TouchableOpacity>
@@ -62,7 +64,9 @@ class MapScreen extends Component {
                 longitudeDelta: 0
             },
             query: '',
-            markers: []
+            markers: [],
+            locationName: '',
+            locationAddress: ''
         }
 
         this._mainMenu = this._mainMenu.bind(this)
@@ -71,7 +75,7 @@ class MapScreen extends Component {
 
     componentDidMount() {
         this._getCurrentLocation()
-        this.props.navigation.setParams({ locateMe: this._locateMe })
+        this.props.navigation.setParams({ locateMe: this._locateMe, mainMenu: this._mainMenu })
     }
 
     _getData() {
@@ -120,7 +124,7 @@ class MapScreen extends Component {
     }
 
     _mainMenu() {
-        Alert.alert('Info', 'Emceka version 1.0.0')
+        Alert.alert('Info', 'ToiRate version 1.0.0')
     }
 
     _locateMe() {
@@ -181,28 +185,64 @@ class MapScreen extends Component {
         const { markers } = this.state
         return (
             <View style={styles.mapContainer}>
-                <StatusBar barStyle="light-content" hidden={false} />
+                <StatusBar
+                    backgroundColor="#4c4d99"
+                    barStyle="light-content"
+                    hidden={false} />
                 <View style={styles.searchContainer}>
                     <View style={styles.searchView}>
-                        <TextInput
-                            placeholder="Type your search"
-                            underlineColorAndroid={'rgba(0,0,0,0)'}
-                            style={styles.searchTextInput}
-                            autoCapitalize="none"
-                            value={this.state.query}
-                            onChangeText={(text) => this.setState({ query: text })}
+                        <GooglePlacesAutocomplete
+                            placeholder='Enter Location'
+                            minLength={2}
+                            autoFocus={false}
+                            fetchDetails={true}
+                            onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
+                                this.setState({
+                                    region: {
+                                        latitude: details.geometry.location.lat,
+                                        longitude: details.geometry.location.lng,
+                                        latitudeDelta: 0.0922,
+                                        longitudeDelta: 0.0421
+                                    },
+                                    locationName: details.name,
+                                    locationAddress: details.formatted_address
+                                })
+                                this._getData()
+                            }}
+                            getDefaultValue={() => ''}
+                            query={{
+                                key: YOUR_GOOGLE_MAPS_API_LOCATION,
+                                language: 'en', // language of the results
+                                types: 'geocode' // default: 'geocode'
+                            }}
+                            styles={{
+                                textInputContainer: {
+                                    backgroundColor: 'rgba(0,0,0,0)',
+                                    borderTopWidth: 0,
+                                    borderBottomWidth: 0
+                                },
+                                textInput: {
+                                    marginLeft: 5,
+                                    marginRight: 5,
+                                    height: 32,
+                                    color: '#5d5d5d',
+                                    borderWidth: 1,
+                                    borderColor: '#ddd',
+                                    borderRadius: 10,
+                                    padding: 5
+                                }
+                            }}
+                            currentLocation={false}
+                            returnKeyType={'search'}
+                            listViewDisplayed={false}
+                        //filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
                         />
-                        <TouchableOpacity
-                            style={styles.searchButton}
-                            onPress={() => this._showNearest()}>
-                            <MaterialIcons name="search" size={28} color="#7f81ff" />
-                        </TouchableOpacity>
                     </View>
                 </View>
                 <MapView
                     style={styles.map}
                     mapType="standard"
-                    showsUserLocation={true}
+                    //showsUserLocation={true}
                     followUserLocation={true}
                     showsCompass={false}
                     showsPointOfInterest={false}
@@ -214,8 +254,8 @@ class MapScreen extends Component {
                             latitude: this.state.region.latitude,
                             longitude: this.state.region.longitude,
                         }}
-                        title={'Me'}
-                        description={'My location'}
+                        title={this.state.locationName || 'Me'}
+                        description={this.state.locationAddress || 'My location'}
                         image={require('../assets/me.png')}
                     />
                     {
@@ -266,18 +306,32 @@ class MapScreen extends Component {
                                         key={i}
                                         coordinate={location}
                                         title={name}
-                                        description={description}>
+                                        description={description}
+                                        image={require('../assets/wc.png')}>
                                         <MapView.Callout>
                                             <View style={styles.callout}>
                                                 <Text style={{ fontWeight: 'bold' }}>{name}</Text>
                                                 <Text>{description}</Text>
-                                                <TouchableOpacity
-                                                    style={styles.callDirection}
-                                                    onPress={() => this._getDirection(location)}>
-                                                    <View style={styles.callButton}>
-                                                        <MaterialIcons name="directions" size={28} color="#ff7fc6" />
-                                                    </View>
-                                                </TouchableOpacity>
+                                                <View style={{
+                                                    width: '100%',
+                                                    flexDirection: 'row',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    <TouchableOpacity
+                                                        style={styles.callDirection}
+                                                        onPress={() => this._getDetail(marker)}>
+                                                        <View style={styles.callButton}>
+                                                            <MaterialIcons name="pageview" size={28} color="#ff7fc6" />
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity
+                                                        style={styles.callDirection}
+                                                        onPress={() => this._getDirection(location)}>
+                                                        <View style={styles.submitButton}>
+                                                            <MaterialIcons name="directions" size={28} color="#515151" />
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </View>
                                             </View>
                                         </MapView.Callout>
                                     </MapView.Marker>
@@ -303,7 +357,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff'
     },
     searchView: {
-        padding: 10,
+        padding: 5,
         display: 'flex',
         flexDirection: 'row'
     },
