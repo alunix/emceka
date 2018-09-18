@@ -8,22 +8,21 @@ import { YOUR_API_FOR_UPLOAD, YOUR_UPLOAD_PRESET } from 'react-native-dotenv'
 
 class RegisterScreen extends Component {
 
-  static navigationOptions = ({ navigation }) => {
-    return {
-      headerTitle: (
+  static navigationOptions = {
+    headerTitle: (
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
         <Image
           source={require('../assets/nav.png')}
           style={{ width: 30, height: 30 }}
         />
-      ),
-      headerRight: (
-        <TouchableOpacity
-          style={{ paddingRight: 10 }}
-          onPress={navigation.getParam('aboutApp')}>
-          <MaterialIcons name="apps" size={24} color="white" />
-        </TouchableOpacity>
-      )
-    }
+        <Text style={{
+          color: '#fff',
+          fontWeight: 'bold',
+          fontSize: 18,
+          marginLeft: 10
+        }}>ToiRate</Text>
+      </View>
+    )
   }
 
   constructor() {

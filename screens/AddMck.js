@@ -26,7 +26,7 @@ import SegmentedControlTab from 'react-native-segmented-control-tab'
 class AddMckScreen extends Component {
 
   static navigationOptions = {
-    title: 'Add Mck'
+    title: 'Add Toilet'
   }
 
   constructor(props) {

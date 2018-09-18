@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Platform, Alert, Text } from 'react-native'
+import { View, TouchableOpacity, Platform, Alert, Text, StatusBar } from 'react-native'
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
 
 class AboutScreen extends Component {
@@ -38,7 +38,10 @@ class AboutScreen extends Component {
 
   render() {
     return (
-      <View style={{ padding: 5 }}>
+      <View style={{ padding: 5, flex: 1 }}>
+        <StatusBar
+          backgroundColor="#4c4d99"
+          barStyle="light-content" />
         <View style={{ backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
           <Text style={{ padding: 10, color: '#fff', backgroundColor: '#ff7fc6', fontWeight: 'bold', textAlign: 'center' }}>ToiRate App</Text>
           <Text style={{ marginVertical: 10, padding: 10 }}>

@@ -14,22 +14,21 @@ firebase.initializeApp(config)
 
 class LoginScreen extends Component {
 
-  static navigationOptions = ({ navigation }) => {
-    return {
-      headerTitle: (
+  static navigationOptions = {
+    headerTitle: (
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
         <Image
           source={require('../assets/nav.png')}
           style={{ width: 30, height: 30 }}
         />
-      ),
-      headerLeft: (
-        <TouchableOpacity
-          style={{ paddingLeft: 10 }}
-          onPress={navigation.getParam('aboutApp')}>
-          <MaterialIcons name="apps" size={24} color="white" />
-        </TouchableOpacity>
-      )
-    }
+        <Text style={{
+          color: '#fff',
+          fontWeight: 'bold',
+          fontSize: 18,
+          marginLeft: 10
+        }}>ToiRate</Text>
+      </View>
+    )
   }
 
   constructor() {
@@ -79,63 +78,70 @@ class LoginScreen extends Component {
 
   render() {
     return (
-      <View style={styles.loginContainer}>
+      <View style={styles.mainContainer}>
         <StatusBar
-          backgroundColor="#4c4d99"
+          backgroundColor="#7274e5"
           barStyle="light-content"
+          translucent={true}
+          animated={true}
           hidden={false} />
-        <View style={styles.formContainer}>
-          <View style={{ padding: 10 }}>
-            <TextInput
-              placeholder="Fill the email"
-              onChangeText={(text) => this.setState({ email: text })}
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              autoCapitalize="none"
-              underlineColorAndroid={'rgba(0,0,0,0)'}
-              style={styles.inputText}
-            />
-            <TextInput
-              placeholder="Fill the password"
-              onChangeText={(text) => this.setState({ password: text })}
-              secureTextEntry={true}
-              underlineColorAndroid={'rgba(0,0,0,0)'}
-              style={styles.inputText}
-            />
-            {
-              !!this.state.errorMessage && (<Text style={styles.errorMessage}>{this.state.errorMessage}</Text>)
-            }
+        <View style={styles.loginContainer}>
+          <View style={styles.formContainer}>
+            <View style={{ padding: 10 }}>
+              <TextInput
+                placeholder="Fill the email"
+                onChangeText={(text) => this.setState({ email: text })}
+                keyboardType="email-address"
+                textContentType="emailAddress"
+                autoCapitalize="none"
+                underlineColorAndroid={'rgba(0,0,0,0)'}
+                style={styles.inputText}
+              />
+              <TextInput
+                placeholder="Fill the password"
+                onChangeText={(text) => this.setState({ password: text })}
+                secureTextEntry={true}
+                underlineColorAndroid={'rgba(0,0,0,0)'}
+                style={styles.inputText}
+              />
+              {
+                !!this.state.errorMessage && (<Text style={styles.errorMessage}>{this.state.errorMessage}</Text>)
+              }
+            </View>
           </View>
-        </View>
-        <TouchableHighlight
-          onPress={() => this._signIn()}
-          style={styles.buttonLogin}>
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Octicons name="sign-in" size={28} color="#fff" />
-            <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 5 }}>Sign In</Text>
-          </View>
-        </TouchableHighlight>
-        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          <Text>
-            Don't have account?
+          <TouchableHighlight
+            onPress={() => this._signIn()}
+            style={styles.buttonLogin}>
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Octicons name="sign-in" size={28} color="#fff" />
+              <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 5 }}>Sign In</Text>
+            </View>
+          </TouchableHighlight>
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+            <Text>
+              You don't have account?
           </Text>
-          <TouchableOpacity
-            onPress={() => this.props.navigation.navigate('Register')}>
-            <Text style={{ marginLeft: 5, color: '#7f81ff', fontWeight: 'bold' }}>Sign Up here.</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => this.props.navigation.navigate('Register')}>
+              <Text style={{ marginLeft: 5, color: '#7f81ff', fontWeight: 'bold' }}>Sign Up here.</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ View>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    display: 'flex'
+  },
   loginContainer: {
-    display: 'flex',
     padding: 5
   },
   formContainer: {

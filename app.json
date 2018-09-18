@@ -15,7 +15,7 @@
     "ios": {
       "bundleIdentifier": "id.ekoteguhw.toirate",
       "config": {
-        "googleMapsApiKey": "YOUR_GOOGLE_MAP_API"
+        "googleMapsApiKey": "AIzaSyATj5R1Vd6my5mfq8QTnRz0abrWRBz8tos"
       },
       "splash": {
         "image": "./assets/splash.png",
@@ -27,7 +27,7 @@
       "package": "id.ekoteguhw.toirate",
       "config": {
         "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAP_API"
+          "apiKey": "AIzaSyATj5R1Vd6my5mfq8QTnRz0abrWRBz8tos"
         }
       },
       "permissions": [

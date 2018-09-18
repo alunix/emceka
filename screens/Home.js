@@ -16,7 +16,7 @@ class HomeScreen extends Component {
         onPress={navigation.getParam('refreshHome')}>
         <Image
           source={require('../assets/nav.png')}
-          style={{ width: 30, height: 30 }}
+          style={{ width: 30, height: 30, alignSelf: 'center' }}
         />
       </TouchableOpacity>,
       headerLeft: (
